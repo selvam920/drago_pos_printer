@@ -87,7 +87,7 @@ class Generator {
     if (!isKanji) {
       return latin1.encode(text);
     } else {
-      return Uint8List.fromList(gbk_bytes.encode(text));
+      return Uint8List.fromList(utf8.encode(text));
     }
   }
 

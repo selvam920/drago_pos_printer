@@ -18,6 +18,6 @@ void main() {
   });
 
   test('getPlatformVersion', () async {
-    expect(await DragoPosPrinter.platformVersion, '42');
+    expect('20', '42');
   });
 }
