@@ -9,12 +9,11 @@ class Demo {
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SALE INVOICE</title>
-
-
 </head>
 
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Khmer&display=swap');
+      
     @page {
         footer: page-footer;
         margin: 1cm;
@@ -39,6 +38,7 @@ class Demo {
         -webkit-print-color-adjust: exact;
     }
     
+  
     body,
     p {
         margin: 0px;
@@ -48,6 +48,7 @@ class Demo {
     
     body {
         background: white;
+        width: 576px;
     }
     
     p {
@@ -1819,15 +1820,16 @@ class Demo {
     }
     
     body {
-        width: 316px;
-        font-size: 1.1em;
-        font-family: "Helvetica","Verdana";
+      width: 200px; 
+      font-size: 12px;
+      font-family: Arial, Helvetica, sans-serif;
     }
     
     .receipt {
-        max-width: 576px;
+        // max-width: 576px;
         margin: auto;
-        background: white;
+        padding-top: 15px;
+        //background: white;
     }
     
     .container {
@@ -1903,13 +1905,193 @@ class Demo {
             <hr>
             <!-- product part -->
             <p class="full-width inline-block">
-                <b class="left">Item c1 p2</b>
+                <b class="left">டீ </b>
                 <b class="right">4.00</b>
             </p>
             <p><span>2 x 2.00</span></p>
 
             <p class="full-width inline-block">
-                <span class="left">Item c1 p2</span>
+                <span class="left">காபி</span>
+                <span class="right">4.00</span>
+            </p>
+             <p class="full-width inline-block">
+                <span class="left">காபி</span>
+                <span class="right">4.00</span>
+            </p>
+             <p class="full-width inline-block">
+                <span class="left">காபி</span>
+                <span class="right">4.00</span>
+            </p>
+             <p class="full-width inline-block">
+                <span class="left">காபி</span>
+                <span class="right">4.00</span>
+            </p>
+            <p class="full-width inline-block">
+                <span class="left">காபி</span>
+                <span class="right">4.00</span>
+            </p>
+             <p class="full-width inline-block">
+                <span class="left">காபி</span>
+                <span class="right">4.00</span>
+            </p>
+             <p class="full-width inline-block">
+                <span class="left">காபி</span>
+                <span class="right">4.00</span>
+            </p>
+             <p class="full-width inline-block">
+                <span class="left">காபி</span>
+                <span class="right">4.00</span>
+            </p>
+            <p class="full-width inline-block">
+                <span class="left">காபி</span>
+                <span class="right">4.00</span>
+            </p>
+             <p class="full-width inline-block">
+                <span class="left">காபி</span>
+                <span class="right">4.00</span>
+            </p>
+             <p class="full-width inline-block">
+                <span class="left">காபி</span>
+                <span class="right">4.00</span>
+            </p>
+             <p class="full-width inline-block">
+                <span class="left">காபி</span>
+                <span class="right">4.00</span>
+            </p>
+            <p class="full-width inline-block">
+                <span class="left">காபி</span>
+                <span class="right">4.00</span>
+            </p>
+             <p class="full-width inline-block">
+                <span class="left">காபி</span>
+                <span class="right">4.00</span>
+            </p>
+             <p class="full-width inline-block">
+                <span class="left">காபி</span>
+                <span class="right">4.00</span>
+            </p>
+             <p class="full-width inline-block">
+                <span class="left">காபி</span>
+                <span class="right">4.00</span>
+            </p>
+            <p class="full-width inline-block">
+                <span class="left">காபி</span>
+                <span class="right">4.00</span>
+            </p>
+             <p class="full-width inline-block">
+                <span class="left">காபி</span>
+                <span class="right">4.00</span>
+            </p>
+             <p class="full-width inline-block">
+                <span class="left">காபி</span>
+                <span class="right">4.00</span>
+            </p>
+             <p class="full-width inline-block">
+                <span class="left">காபி</span>
+                <span class="right">4.00</span>
+            </p>
+            <p class="full-width inline-block">
+                <span class="left">காபி</span>
+                <span class="right">4.00</span>
+            </p>
+             <p class="full-width inline-block">
+                <span class="left">காபி</span>
+                <span class="right">4.00</span>
+            </p>
+             <p class="full-width inline-block">
+                <span class="left">காபி</span>
+                <span class="right">4.00</span>
+            </p>
+             <p class="full-width inline-block">
+                <span class="left">காபி</span>
+                <span class="right">4.00</span>
+            </p>
+            <p class="full-width inline-block">
+                <span class="left">காபி</span>
+                <span class="right">4.00</span>
+            </p>
+             <p class="full-width inline-block">
+                <span class="left">காபி</span>
+                <span class="right">4.00</span>
+            </p>
+             <p class="full-width inline-block">
+                <span class="left">காபி</span>
+                <span class="right">4.00</span>
+            </p>
+             <p class="full-width inline-block">
+                <span class="left">காபி</span>
+                <span class="right">4.00</span>
+            </p>
+            <p class="full-width inline-block">
+                <span class="left">காபி</span>
+                <span class="right">4.00</span>
+            </p>
+             <p class="full-width inline-block">
+                <span class="left">காபி</span>
+                <span class="right">4.00</span>
+            </p>
+             <p class="full-width inline-block">
+                <span class="left">காபி</span>
+                <span class="right">4.00</span>
+            </p>
+             <p class="full-width inline-block">
+                <span class="left">காபி</span>
+                <span class="right">4.00</span>
+            </p>
+            <p class="full-width inline-block">
+                <span class="left">காபி</span>
+                <span class="right">4.00</span>
+            </p>
+             <p class="full-width inline-block">
+                <span class="left">காபி</span>
+                <span class="right">4.00</span>
+            </p>
+             <p class="full-width inline-block">
+                <span class="left">காபி</span>
+                <span class="right">4.00</span>
+            </p>
+             <p class="full-width inline-block">
+                <span class="left">காபி</span>
+                <span class="right">4.00</span>
+            </p>
+            <p class="full-width inline-block">
+                <span class="left">காபி</span>
+                <span class="right">4.00</span>
+            </p>
+             <p class="full-width inline-block">
+                <span class="left">காபி</span>
+                <span class="right">4.00</span>
+            </p>
+             <p class="full-width inline-block">
+                <span class="left">காபி</span>
+                <span class="right">4.00</span>
+            </p>
+             <p class="full-width inline-block">
+                <span class="left">காபி</span>
+                <span class="right">4.00</span>
+            </p>
+             <p class="full-width inline-block">
+                <span class="left">காபி</span>
+                <span class="right">4.00</span>
+            </p>
+             <p class="full-width inline-block">
+                <span class="left">காபி</span>
+                <span class="right">4.00</span>
+            </p>
+             <p class="full-width inline-block">
+                <span class="left">காபி</span>
+                <span class="right">4.00</span>
+            </p>
+             <p class="full-width inline-block">
+                <span class="left">காபி</span>
+                <span class="right">4.00</span>
+            </p>
+             <p class="full-width inline-block">
+                <span class="left">காபி</span>
+                <span class="right">4.00</span>
+            </p>
+             <p class="full-width inline-block">
+                <span class="left">காபி</span>
                 <span class="right">4.00</span>
             </p>
             <p><span>2 x 2.00</span></p>
@@ -1940,14 +2122,10 @@ class Demo {
         </div>
 
     </div>
-    <div class="container text-center">
-        <br>
-        <p>សូមអរគុណ</p>
-        <p>@2020 <a href="https://mylekha.app">MYLEKHA</a>. All right reserved.</p>
-    </div>
+    
     <br>
     <br>
-
+-
 
 </body>
 

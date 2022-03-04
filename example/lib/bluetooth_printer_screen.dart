@@ -1,6 +1,14 @@
+import 'dart:io';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:drago_pos_printer/drago_pos_printer.dart';
 import 'package:drago_pos_printer_example/webview_helper.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:pdf/pdf.dart';
+import 'package:open_file/open_file.dart';
+
+import 'package:printing/printing.dart';
 import 'package:webcontent_converter/webcontent_converter.dart';
 import 'demo.dart';
 import 'service.dart';
@@ -161,27 +169,53 @@ class _BluetoothPrinterScreenState extends State<BluetoothPrinterScreen> {
 
   _startPrinter(int byteType, BluetoothPrinter printer) async {
     await _connect(printer);
-    final content = Demo.getShortReceiptContent();
-    var bytes = byteType == 1
-        ? await ESCPrinterService(null).getSamplePosBytes(
-            paperSizeWidthMM: _manager!.paperSizeWidthMM,
-            maxPerLine: _manager!.maxPerLine,
-            profile: _manager!.profile)
-        : byteType == 2
-            ? await ESCPrinterService(null).getPdfBytes(
-                paperSizeWidthMM: _manager!.paperSizeWidthMM,
-                maxPerLine: _manager!.maxPerLine,
-                profile: _manager!.profile)
-            : await WebcontentConverter.contentToImage(
-                content: content,
-                executablePath: WebViewHelper.executablePath(),
-              );
-    List<int> data;
-    if (byteType == 3) {
-      var service = ESCPrinterService(bytes);
-      data = await service.getBytes();
-    } else
-      data = bytes;
+
+    late List<int> data;
+    if (byteType == 1) {
+      data = await ESCPrinterService(null).getSamplePosBytes(
+          paperSizeWidthMM: _manager!.paperSizeWidthMM,
+          maxPerLine: _manager!.maxPerLine,
+          profile: _manager!.profile);
+    } else if (byteType == 2) {
+      data = await ESCPrinterService(null).getPdfBytes(
+          paperSizeWidthMM: _manager!.paperSizeWidthMM,
+          maxPerLine: _manager!.maxPerLine,
+          profile: _manager!.profile);
+    } else if (byteType == 3) {
+      final content = Demo.getShortReceiptContent();
+
+      Uint8List? htmlBytes = await WebcontentConverter.contentToImage(
+        content: content,
+        executablePath: WebViewHelper.executablePath(),
+      );
+
+      // String dir = (await getTemporaryDirectory()).path;
+      // String fullPath = '$dir/abc.png';
+      // print("local file full path ${fullPath}");
+      // File file = File(fullPath);
+      // await file.writeAsBytes(htmlBytes!);
+
+      // OpenFile.open(fullPath);
+
+      var service = ESCPrinterService(htmlBytes);
+      data = await service.getBytes(
+          paperSizeWidthMM: _manager!.paperSizeWidthMM,
+          maxPerLine: _manager!.maxPerLine,
+          profile: _manager!.profile);
+
+//  var pdfBytes = await Printing.convertHtml(
+//         format: PdfPageFormat.roll57,
+//         html: content,
+//       );
+
+//       await for (var page in Printing.raster(pdfBytes, dpi: 72)) {
+//         final image = await page.toPng(); // ...or page.toPng()
+
+//         var service = ESCPrinterService(image);
+//         data = await service.getBytes();
+//       }
+    }
+
     if (_manager != null) {
       if (!await _manager!.checkConnected()) await _manager!.connect();
       print("isConnected ${_manager!.isConnected}");

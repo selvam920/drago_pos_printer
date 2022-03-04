@@ -2,12 +2,13 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/services.dart';
 import 'package:image/image.dart' as img;
+import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart' as pf;
 import 'package:pdf/widgets.dart' as pw;
 import 'package:drago_pos_printer/drago_pos_printer.dart';
 import 'package:printing/printing.dart';
-import 'package:qr_flutter/qr_flutter.dart';
+// import 'package:qr_flutter/qr_flutter.dart';
 
 class ESCPrinterService {
   final Uint8List? receipt;
@@ -22,7 +23,7 @@ class ESCPrinterService {
   ESCPrinterService(this.receipt);
 
   Future<List<int>> getBytes({
-    int paperSizeWidthMM = PaperSizeMaxPerLine.mm80,
+    int paperSizeWidthMM = PaperSizeWidth.mm80,
     int maxPerLine = PaperSizeMaxPerLine.mm80,
     CapabilityProfile? profile,
     String name = "default",
@@ -36,8 +37,20 @@ class ESCPrinterService {
     assert(_profile != null);
     Generator generator =
         Generator(_paperSizeWidthMM!, _maxPerLine!, _profile!);
+    var decodeImage = img.decodeImage(receipt!);
+    if (decodeImage == null) throw Exception('decoded image is null');
     final img.Image _resize =
-        img.copyResize(img.decodeImage(receipt!)!, width: _paperSizeWidthMM!);
+        img.copyResize(decodeImage, width: _paperSizeWidthMM);
+
+    String dir = (await getTemporaryDirectory()).path;
+    String fullPath = '$dir/abc.png';
+    print("local file full path ${fullPath}");
+    File file = File(fullPath);
+
+    await file.writeAsBytes(img.encodePng(decodeImage));
+
+    OpenFile.open(fullPath);
+
     bytes += generator.image(_resize);
     bytes += generator.feed(2);
     bytes += generator.cut();
