@@ -70,7 +70,7 @@ packages:
       name: collection
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.15.0"
+    version: "1.16.0"
   crypto:
     dependency: transitive
     description:
@@ -479,9 +479,11 @@ packages:
   webcontent_converter:
     dependency: "direct main"
     description:
-      name: webcontent_converter
-      url: "https://pub.dartlang.org"
-    source: hosted
+      path: "."
+      ref: HEAD
+      resolved-ref: "66a5b676b519c5e1f2b4157c8737f2bf14fe4bb8"
+      url: "https://github.com/selvam920/webcontent_converter"
+    source: git
     version: "0.0.7+1"
   win32:
     dependency: transitive
@@ -505,5 +507,5 @@ packages:
     source: hosted
     version: "5.3.1"
 sdks:
-  dart: ">=2.16.0-100.0.dev <3.0.0"
+  dart: ">=2.16.0 <3.0.0"
   flutter: ">=2.5.0"
