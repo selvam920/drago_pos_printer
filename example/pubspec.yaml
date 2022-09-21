@@ -17,7 +17,7 @@ dependencies:
   charset_converter: ^2.1.0
   intl: ^0.17.0
   path_provider: ^2.0.2
-  open_file: ^3.2.1
+  open_file: any
   # qr_flutter: ^4.0.0
   printing:
 
