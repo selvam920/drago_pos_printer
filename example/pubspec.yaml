@@ -6,7 +6,7 @@ description: Demonstrates how to use the pos_printing plugin.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
 environment:
-  sdk: '>=2.12.0 <3.0.0'
+  sdk: '>=2.19.2 <3.0.0'
 
 dependencies:
   flutter:
@@ -14,10 +14,9 @@ dependencies:
   webcontent_converter:
     git:
       url: https://github.com/selvam920/webcontent_converter
-  charset_converter: ^2.1.0
-  intl: ^0.17.0
-  path_provider: ^2.0.2
-  open_file: any
+  charset_converter: 
+  intl: 
+  path_provider:
   # qr_flutter: ^4.0.0
   printing:
 

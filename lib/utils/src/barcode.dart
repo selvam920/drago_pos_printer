@@ -1,11 +1,3 @@
-/*
- * esc_pos_utils
- * Created by Andrey U.
- * 
- * Copyright (c) 2019-2020. All rights reserved.
- * See LICENSE for distribution and usage details.
- */
-
 class BarcodeType {
   const BarcodeType._internal(this.value);
   final int value;
@@ -246,25 +238,18 @@ class Barcode {
       throw Exception('Barcode: Wrong data range');
     }
 
-    final regex = RegExp(r'^\{[A-C][\x00-\x7F]+$');
-    final bool isDataValid = regex.hasMatch(barcodeData.join());
-
-    if (!isDataValid) {
-      throw Exception('Barcode: Data is not valid');
-    }
-
     _type = BarcodeType.code128;
     _data = _convertData(barcodeData);
   }
 
-  BarcodeType? _type;
-  List<int>? _data;
+  late BarcodeType _type;
+  late List<int> _data;
 
   List<int> _convertData(List<dynamic> list) =>
       list.map((dynamic d) => d.toString().codeUnitAt(0)).toList();
 
   int _charcode(dynamic ch) => ch.toString().codeUnitAt(0);
 
-  BarcodeType? get type => _type;
-  List<int>? get data => _data;
+  BarcodeType get type => _type;
+  List<int> get data => _data;
 }

@@ -1,13 +1,4 @@
-/*
- * esc_pos_utils
- * Created by Andrey U.
- * 
- * Copyright (c) 2019-2020. All rights reserved.
- * See LICENSE for distribution and usage details.
- */
-
 import 'dart:convert' show json;
-import 'dart:convert' show utf8;
 import 'package:flutter/services.dart' show rootBundle;
 
 List<Map> printProfiles = [];
@@ -38,7 +29,7 @@ class CapabilityProfile {
         printProfiles.add({
           'key': k,
           'vendor': v['vendor'] is String ? v['vendor'] : '',
-          'name': v['name'] is String ? v['name'] : '',
+          'model': v['model'] is String ? v['model'] : '',
           'description': v['description'] is String ? v['description'] : '',
         });
       });
@@ -52,7 +43,6 @@ class CapabilityProfile {
 
   /// Public factory
   static Future<CapabilityProfile> load({String name = 'default'}) async {
-    ///
     await ensureProfileLoaded();
 
     var profile = printCapabilities['profiles'][name];
@@ -74,16 +64,14 @@ class CapabilityProfile {
   List<CodePage> codePages;
 
   int getCodePageId(String? codePage) {
-    if (codePages == null) {
+    if (codePages.length == 0) {
       throw Exception("The CapabilityProfile isn't initialized");
     }
 
     return codePages
         .firstWhere((cp) => cp.name == codePage,
-            // ignore: unnecessary_cast
-            orElse: (() => throw Exception(
-                    "Code Page '$codePage' isn't defined for this profile"))
-                as CodePage Function()?)
+            orElse: () => throw Exception(
+                "Code Page '$codePage' isn't defined for this profile"))
         .id;
   }
 
@@ -99,7 +87,7 @@ class CapabilityProfile {
       res.add({
         'key': k,
         'vendor': v['vendor'] is String ? v['vendor'] : '',
-        'name': v['name'] is String ? v['name'] : '',
+        'model': v['model'] is String ? v['model'] : '',
         'description': v['description'] is String ? v['description'] : '',
       });
     });

@@ -30,7 +30,6 @@ class NetworkAnalyzer {
     if (port < 1 || port > 65535) {
       throw 'Incorrect port';
     }
-    // TODO : validate subnet
 
     for (int i = 1; i < 256; ++i) {
       final host = '$subnet.$i';
@@ -66,7 +65,6 @@ class NetworkAnalyzer {
     if (port < 1 || port > 65535) {
       throw 'Incorrect port';
     }
-    // TODO : validate subnet
 
     final out = StreamController<NetworkAddress>();
     final futures = <Future<Socket>>[];

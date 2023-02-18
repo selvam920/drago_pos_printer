@@ -33,7 +33,7 @@ class USBPrinterManager extends PrinterManager {
     int maxPerLine,
     CapabilityProfile profile, {
     int spaceBetweenRows = 5,
-    int port: 9100,
+    int port = 9100,
   }) {
     super.printer = printer;
     super.address = printer.address;
@@ -51,7 +51,7 @@ class USBPrinterManager extends PrinterManager {
 
   @override
   Future<ConnectionResponse> connect(
-      {Duration? timeout: const Duration(seconds: 5)}) async {
+      {Duration? timeout = const Duration(seconds: 5)}) async {
     if (Platform.isWindows) {
       try {
         docInfo = calloc<DOC_INFO_1>()

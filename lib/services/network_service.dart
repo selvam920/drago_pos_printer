@@ -4,7 +4,7 @@ import 'package:drago_pos_printer/helpers/network_analyzer.dart';
 
 class NetworkService {}
 
-Future<List<String>> findNetworkPrinter({int port: 9100}) async {
+Future<List<String>> findNetworkPrinter({int port = 9100}) async {
   final _info = NetworkInfo();
   String? ip = await (_info.getWifiIP());
   if (ip?.isEmpty == true) {

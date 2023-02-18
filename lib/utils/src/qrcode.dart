@@ -1,15 +1,5 @@
-/*
- * esc_pos_utils
- * Created by Andrey U.
- * 
- * Copyright (c) 2019-2020. All rights reserved.
- * See LICENSE for distribution and usage details.
- */
-
-import 'package:drago_pos_printer/utils/esc_pos_utils.dart';
+import 'commands.dart';
 import 'dart:convert';
-
-import 'package:drago_pos_printer/utils/src/commands.dart';
 
 class QRSize {
   const QRSize(this.value);
@@ -64,7 +54,7 @@ class QRCode {
 
     // FN 182. QR Code: Transmit the size information of the symbol data in the symbol storage area
     // pL pH cn fn m
-    bytes += cQrHeader.codeUnits + [0x03, 0x00, 0x31, 0x52, 0x30];
+    // bytes += cQrHeader.codeUnits + [0x03, 0x00, 0x31, 0x52, 0x30];
 
     // FN 181. QR Code: Print the symbol data in the symbol storage area
     // pL pH cn fn m

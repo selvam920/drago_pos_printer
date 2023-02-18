@@ -2,7 +2,6 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/services.dart';
 import 'package:image/image.dart' as img;
-import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart' as pf;
 import 'package:pdf/widgets.dart' as pw;
@@ -49,7 +48,7 @@ class ESCPrinterService {
 
     await file.writeAsBytes(img.encodePng(decodeImage));
 
-    OpenFile.open(fullPath);
+    // OpenFile.open(fullPath);
 
     bytes += generator.image(_resize);
     bytes += generator.feed(2);
@@ -150,8 +149,8 @@ class ESCPrinterService {
         styles: PosStyles(align: PosAlign.center));
     bytes += ticket.text('Tel: 830-221-1234',
         styles: PosStyles(align: PosAlign.center));
-    bytes += ticket.text('Web: www.example.com',
-        styles: PosStyles(align: PosAlign.center));
+    bytes +=
+        ticket.text('Web: .com', styles: PosStyles(align: PosAlign.center));
 
     bytes += ticket.hr();
     bytes += ticket.row([

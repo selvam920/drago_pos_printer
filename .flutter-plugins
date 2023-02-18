@@ -1,13 +1,9 @@
 # This is a generated file; do not edit or check into version control.
-drago_blue_printer=C:\\Users\\sksso\\AppData\\Local\\Pub\\Cache\\hosted\\pub.dartlang.org\\drago_blue_printer-0.0.2\\
-drago_usb_printer=C:\\Users\\sksso\\AppData\\Local\\Pub\\Cache\\hosted\\pub.dartlang.org\\drago_usb_printer-0.0.1\\
-network_info_plus=C:\\Users\\sksso\\AppData\\Local\\Pub\\Cache\\hosted\\pub.dartlang.org\\network_info_plus-2.1.3\\
-network_info_plus_linux=C:\\Users\\sksso\\AppData\\Local\\Pub\\Cache\\hosted\\pub.dartlang.org\\network_info_plus_linux-1.1.2\\
-network_info_plus_macos=C:\\Users\\sksso\\AppData\\Local\\Pub\\Cache\\hosted\\pub.dartlang.org\\network_info_plus_macos-1.3.0\\
-network_info_plus_web=C:\\Users\\sksso\\AppData\\Local\\Pub\\Cache\\hosted\\pub.dartlang.org\\network_info_plus_web-1.0.1\\
-network_info_plus_windows=C:\\Users\\sksso\\AppData\\Local\\Pub\\Cache\\hosted\\pub.dartlang.org\\network_info_plus_windows-1.0.2\\
-permission_handler=C:\\Users\\sksso\\AppData\\Local\\Pub\\Cache\\hosted\\pub.dartlang.org\\permission_handler-9.2.0\\
-permission_handler_android=C:\\Users\\sksso\\AppData\\Local\\Pub\\Cache\\hosted\\pub.dartlang.org\\permission_handler_android-9.0.2+1\\
-permission_handler_apple=C:\\Users\\sksso\\AppData\\Local\\Pub\\Cache\\hosted\\pub.dartlang.org\\permission_handler_apple-9.0.3\\
-permission_handler_windows=C:\\Users\\sksso\\AppData\\Local\\Pub\\Cache\\hosted\\pub.dartlang.org\\permission_handler_windows-0.1.0\\
-printing=C:\\Users\\sksso\\AppData\\Local\\Pub\\Cache\\hosted\\pub.dartlang.org\\printing-5.9.3\\
+drago_blue_printer=C:\\Users\\sksso\\AppData\\Local\\Pub\\Cache\\hosted\\pub.dev\\drago_blue_printer-0.0.3\\
+drago_usb_printer=C:\\Users\\sksso\\AppData\\Local\\Pub\\Cache\\hosted\\pub.dev\\drago_usb_printer-0.0.2\\
+network_info_plus=C:\\Users\\sksso\\AppData\\Local\\Pub\\Cache\\hosted\\pub.dev\\network_info_plus-3.0.2\\
+permission_handler=C:\\Users\\sksso\\AppData\\Local\\Pub\\Cache\\hosted\\pub.dev\\permission_handler-9.2.0\\
+permission_handler_android=C:\\Users\\sksso\\AppData\\Local\\Pub\\Cache\\hosted\\pub.dev\\permission_handler_android-9.0.2+1\\
+permission_handler_apple=C:\\Users\\sksso\\AppData\\Local\\Pub\\Cache\\hosted\\pub.dev\\permission_handler_apple-9.0.7\\
+permission_handler_windows=C:\\Users\\sksso\\AppData\\Local\\Pub\\Cache\\hosted\\pub.dev\\permission_handler_windows-0.1.2\\
+printing=C:\\Users\\sksso\\AppData\\Local\\Pub\\Cache\\hosted\\pub.dev\\printing-5.10.1\\

@@ -9,11 +9,11 @@ class BluetoothPrinterManager {
     int maxPerLine,
     CapabilityProfile profile, {
     int spaceBetweenRows = 5,
-    int port: 9100,
+    int port = 9100,
   });
 
   Future<ConnectionResponse> connect(
-      {Duration? timeout: const Duration(seconds: 5)}) {
+      {Duration? timeout = const Duration(seconds: 5)}) {
     throw Exception('Platform does not support');
   }
 

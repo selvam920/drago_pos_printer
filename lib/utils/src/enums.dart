@@ -1,14 +1,9 @@
-/*
- * esc_pos_utils
- * Created by Andrey U.
- * 
- * Copyright (c) 2019-2020. All rights reserved.
- * See LICENSE for distribution and usage details.
- */
-
 enum PosAlign { left, center, right }
+
 enum PosCutMode { full, partial }
+
 enum PosFontType { fontA, fontB }
+
 enum PosDrawer { pin2, pin5 }
 
 /// Choose image printing function
@@ -17,16 +12,19 @@ enum PosDrawer { pin2, pin5 }
 enum PosImageFn { bitImageRaster, graphics }
 
 class PosTextSize {
-  static const size1 = 1;
-  static const size2 = 2;
-  static const size3 = 3;
-  static const size4 = 4;
-  static const size5 = 5;
-  static const size6 = 6;
-  static const size7 = 7;
-  static const size8 = 8;
+  const PosTextSize._internal(this.value);
+  final int value;
+  static const size1 = PosTextSize._internal(1);
+  static const size2 = PosTextSize._internal(2);
+  static const size3 = PosTextSize._internal(3);
+  static const size4 = PosTextSize._internal(4);
+  static const size5 = PosTextSize._internal(5);
+  static const size6 = PosTextSize._internal(6);
+  static const size7 = PosTextSize._internal(7);
+  static const size8 = PosTextSize._internal(8);
 
-  static int decSize(int height, int width) => 16 * (width - 1) + (height - 1);
+  static int decSize(PosTextSize height, PosTextSize width) =>
+      16 * (width.value - 1) + (height.value - 1);
 }
 
 class PaperSizeWidth {
@@ -52,22 +50,14 @@ class PaperSizeMaxPerLine {
 //   const PaperSize._internal(this.value);
 //   final int value;
 //   static const mm58 = PaperSize._internal(1);
-//   static const mm70 = PaperSize._internal(2);
+//   static const mm80 = PaperSize._internal(2);
 //   static const mm72 = PaperSize._internal(3);
-//   static const mm80 = PaperSize._internal(4);
 
-//   int get width {
-//     if (value == PaperSize.mm58.value) {
-//       return 384;
-//     } else if (value == PaperSize.mm70.value) {
-//       return 500;
-//     } else if (value == PaperSize.mm72.value) {
-//       return 512;
-//     } else {
-//       return 576;
-//     }
-//     // value == PaperSize.mm58.value ? 384 : 558;
-//   }
+//   int get width => value == PaperSize.mm58.value
+//       ? 372
+//       : value == PaperSize.mm72.value
+//           ? 503
+//           : 558;
 // }
 
 class PosBeepDuration {

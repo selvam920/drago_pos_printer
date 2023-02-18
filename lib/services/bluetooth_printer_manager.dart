@@ -20,7 +20,7 @@ class BluetoothPrinterManager extends PrinterManager {
     int maxPerLine,
     CapabilityProfile profile, {
     int spaceBetweenRows = 5,
-    int port: 9100,
+    int port = 9100,
   }) {
     super.printer = printer;
     super.address = printer.address;
@@ -38,7 +38,7 @@ class BluetoothPrinterManager extends PrinterManager {
 
   /// [connect] let you connect to a bluetooth printer
   Future<ConnectionResponse> connect(
-      {Duration? timeout: const Duration(seconds: 5)}) async {
+      {Duration? timeout = const Duration(seconds: 5)}) async {
     try {
       // if (Platform.isIOS) {
       // fbdevice = fblue.BluetoothDevice.fromProto(proto.BluetoothDevice(
@@ -103,8 +103,8 @@ class BluetoothPrinterManager extends PrinterManager {
   /// [writeBytes] let you write raw list int data into socket
   @override
   Future<ConnectionResponse> writeBytes(List<int> data,
-      {bool isDisconnect: true,
-      Duration? timeout: const Duration(milliseconds: 20)}) async {
+      {bool isDisconnect = true,
+      Duration? timeout = const Duration(milliseconds: 20)}) async {
     try {
       if (!isConnected) {
         await connect();
