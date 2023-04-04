@@ -143,6 +143,9 @@ class Generator {
 
     // Create a black bottom layer
     final biggerImage = copyResize(image, width: widthPx, height: heightPx);
+    fill(biggerImage, color: ColorInt8(0));
+    // Insert source image into bigger one
+    compositeImage(biggerImage, image, dstX: 0, dstY: 0);
 
     int left = 0;
     final List<List<int>> blobs = [];
@@ -150,7 +153,9 @@ class Generator {
     while (left < widthPx) {
       final Image slice = copyCrop(biggerImage,
           x: left, y: 0, width: lineHeight, height: heightPx);
-      final Uint8List bytes = slice.getBytes(order: ChannelOrder.argb);
+      grayscale(slice);
+      final imgBinary = slice.convert(numChannels: 1);
+      final bytes = imgBinary.getBytes();
       blobs.add(bytes);
       left += lineHeight;
     }
@@ -158,7 +163,6 @@ class Generator {
     return blobs;
   }
 
-  /// Image rasterization
   /// Image rasterization
   List<int> _toRasterFormat(Image imgSrc) {
     final Image image = Image.from(imgSrc); // make a copy
@@ -170,7 +174,7 @@ class Generator {
 
     // R/G/B channels are same -> keep only one channel
     final List<int> oneChannelBytes = [];
-    final List<int> buffer = image.getBytes(order: ChannelOrder.argb);
+    final List<int> buffer = image.getBytes(order: ChannelOrder.rgba);
     for (int i = 0; i < buffer.length; i += 4) {
       oneChannelBytes.add(buffer[i]);
     }
@@ -214,6 +218,7 @@ class Generator {
     return ((0xFFFFFFFF ^ (0x1 << shift)) & uint32) |
         ((newValue ? 1 : 0) << shift);
   }
+
   // ************************ (end) Internal helpers  ************************
 
   //**************************** Public command generators ************************
@@ -225,12 +230,6 @@ class Generator {
     bytes += setGlobalCodeTable(_codeTable);
     bytes += setGlobalFont(_font);
     return bytes;
-  }
-
-  /// Clear the buffer and reset text styles
-  List<int> clearStyle() {
-    return setStyles(
-        const PosStyles(height: PosTextSize.size1, width: PosTextSize.size1));
   }
 
   /// Set global code table which will be used instead of the default printer's code table
@@ -263,7 +262,7 @@ class Generator {
   List<int> setStyles(PosStyles styles, {bool isKanji = false}) {
     List<int> bytes = [];
     if (styles.align != _styles.align) {
-      bytes += codec.encode(styles.align == PosAlign.left
+      bytes += latin1.encode(styles.align == PosAlign.left
           ? cAlignLeft
           : (styles.align == PosAlign.center ? cAlignCenter : cAlignRight));
       _styles = _styles.copyWith(align: styles.align);
@@ -334,7 +333,7 @@ class Generator {
     return bytes;
   }
 
-  /// Send raw command(s)
+  /// Sens raw command(s)
   List<int> rawBytes(List<int> cmd, {bool isKanji = false}) {
     List<int> bytes = [];
     if (!isKanji) {
@@ -393,7 +392,7 @@ class Generator {
 
   /// Cut the paper
   ///
-  /// [mode] is used to define the full or partial cut (if supported by the printer)
+  /// [mode] is used to define the full or partial cut (if supported by the priner)
   List<int> cut({PosCutMode mode = PosCutMode.full}) {
     List<int> bytes = [];
     bytes += emptyLines(5);
@@ -449,7 +448,7 @@ class Generator {
     return bytes;
   }
 
-  /// Reverse feed for [n] lines (if supported by the printer)
+  /// Reverse feed for [n] lines (if supported by the priner)
   List<int> reverseFeed(int n) {
     List<int> bytes = [];
     bytes += Uint8List.fromList(
@@ -462,7 +461,7 @@ class Generator {
   ///
   /// A row contains up to 12 columns. A column has a width between 1 and 12.
   /// Total width of columns in one row must be equal 12.
-  List<int> row(List<PosColumn> cols, {bool multiLine = true}) {
+  List<int> row(List<PosColumn> cols) {
     List<int> bytes = [];
     final isSumValid = cols.fold(0, (int sum, col) => sum + col.width) == 12;
     if (!isSumValid) {
@@ -487,23 +486,21 @@ class Generator {
             : _encode(cols[i].text);
 
         // If the col's content is too long, split it to the next row
-        if (multiLine) {
-          int realCharactersNb = encodedToPrint.length;
-          if (realCharactersNb > maxCharactersNb) {
-            // Print max possible and split to the next row
-            Uint8List encodedToPrintNextRow =
-                encodedToPrint.sublist(maxCharactersNb);
-            encodedToPrint = encodedToPrint.sublist(0, maxCharactersNb);
-            isNextRow = true;
-            nextRow.add(PosColumn(
-                textEncoded: encodedToPrintNextRow,
-                width: cols[i].width,
-                styles: cols[i].styles));
-          } else {
-            // Insert an empty col
-            nextRow.add(PosColumn(
-                text: '', width: cols[i].width, styles: cols[i].styles));
-          }
+        int realCharactersNb = encodedToPrint.length;
+        if (realCharactersNb > maxCharactersNb) {
+          // Print max possible and split to the next row
+          Uint8List encodedToPrintNextRow =
+              encodedToPrint.sublist(maxCharactersNb);
+          encodedToPrint = encodedToPrint.sublist(0, maxCharactersNb);
+          isNextRow = true;
+          nextRow.add(PosColumn(
+              textEncoded: encodedToPrintNextRow,
+              width: cols[i].width,
+              styles: cols[i].styles));
+        } else {
+          // Insert an empty col
+          nextRow.add(PosColumn(
+              text: '', width: cols[i].width, styles: cols[i].styles));
         }
         // end rows splitting
         bytes += _text(
@@ -547,17 +544,16 @@ class Generator {
         final List<bool> isLexemeChinese = list[1];
 
         // Print each lexeme using codetable OR kanji
-        int? colIndex = colInd;
         for (var j = 0; j < lexemes.length; ++j) {
           bytes += _text(
             _encode(lexemes[j], isKanji: isLexemeChinese[j]),
             styles: cols[i].styles,
-            colInd: colIndex,
+            colInd: colInd,
             colWidth: cols[i].width,
             isKanji: isLexemeChinese[j],
           );
           // Define the absolute position only once (we print one line only)
-          colIndex = null;
+          // colInd = null;
         }
       }
     }
@@ -565,37 +561,28 @@ class Generator {
     bytes += emptyLines(1);
 
     if (isNextRow) {
-      bytes += row(nextRow);
+      row(nextRow);
     }
     return bytes;
   }
 
   /// Print an image using (ESC *) command
   ///
-  /// [image] is an instance of class from [Image library](https://pub.dev/packages/image)
-  List<int> image(Image imgSrc,
-      {PosAlign align = PosAlign.center, bool isDoubleDensity = true}) {
+  /// [image] is an instanse of class from [Image library](https://pub.dev/packages/image)
+  List<int> image(Image imgSrc, {PosAlign align = PosAlign.center}) {
     List<int> bytes = [];
     // Image alignment
     bytes += setStyles(PosStyles().copyWith(align: align));
 
-    Image image;
-    if (!isDoubleDensity) {
-      int size = this.paperWidthMM;
-
-      image =
-          copyResize(imgSrc, width: size, interpolation: Interpolation.linear);
-    } else {
-      image = Image.from(imgSrc); // make a copy
-    }
-    bool highDensityHorizontal = isDoubleDensity;
-    bool highDensityVertical = isDoubleDensity;
+    final Image image = Image.from(imgSrc); // make a copy
+    const bool highDensityHorizontal = true;
+    const bool highDensityVertical = true;
 
     invert(image);
     flip(image, direction: FlipDirection.horizontal);
     final Image imageRotated = copyRotate(image, angle: 270);
 
-    int lineHeight = highDensityVertical ? 3 : 1;
+    const int lineHeight = highDensityVertical ? 3 : 1;
     final List<List<int>> blobs = _toColumnFormat(imageRotated, lineHeight * 8);
 
     // Compress according to line density
@@ -607,7 +594,7 @@ class Generator {
     }
 
     final int heightPx = imageRotated.height;
-    int densityByte =
+    const int densityByte =
         (highDensityHorizontal ? 1 : 0) + (highDensityVertical ? 32 : 0);
 
     final List<int> header = List.from(cBitImg.codeUnits);
@@ -615,7 +602,7 @@ class Generator {
     header.addAll(_intLowHigh(heightPx, 2));
 
     // Adjust line spacing (for 16-unit line feeds): ESC 3 0x10 (HEX: 0x1b 0x33 0x10)
-    bytes += [27, 51, 0];
+    bytes += [27, 51, 16];
     for (int i = 0; i < blobs.length; ++i) {
       bytes += List.from(header)
         ..addAll(blobs[i])
@@ -643,7 +630,7 @@ class Generator {
     final int widthPx = image.width;
     final int heightPx = image.height;
     final int widthBytes = (widthPx + 7) ~/ 8;
-    final List<int> rasterizedData = _toRasterFormat(image);
+    final List<int> resterizedData = _toRasterFormat(image);
 
     if (imageFn == PosImageFn.bitImageRaster) {
       // GS v 0
@@ -654,7 +641,7 @@ class Generator {
       header.add(densityByte); // m
       header.addAll(_intLowHigh(widthBytes, 2)); // xL xH
       header.addAll(_intLowHigh(heightPx, 2)); // yL yH
-      bytes += List.from(header)..addAll(rasterizedData);
+      bytes += List.from(header)..addAll(resterizedData);
     } else if (imageFn == PosImageFn.graphics) {
       // 'GS ( L' - FN_112 (Image data)
       final List<int> header1 = List.from(cRasterImg.codeUnits);
@@ -664,7 +651,7 @@ class Generator {
       header1.addAll([49]); // c=49
       header1.addAll(_intLowHigh(widthBytes, 2)); // xL xH
       header1.addAll(_intLowHigh(heightPx, 2)); // yL yH
-      bytes += List.from(header1)..addAll(rasterizedData);
+      bytes += List.from(header1)..addAll(resterizedData);
 
       // 'GS ( L' - FN_50 (Run print)
       final List<int> header2 = List.from(cRasterImg.codeUnits);
@@ -710,13 +697,13 @@ class Generator {
     }
 
     // Print barcode
-    final header = cBarcodePrint.codeUnits + [barcode.type.value];
-    if (barcode.type.value <= 6) {
+    final header = cBarcodePrint.codeUnits + [barcode.type!.value];
+    if (barcode.type!.value <= 6) {
       // Function A
-      bytes += header + barcode.data + [0];
+      bytes += header + barcode.data! + [0];
     } else {
       // Function B
-      bytes += header + [barcode.data.length] + barcode.data;
+      bytes += header + [barcode.data!.length] + barcode.data!;
     }
     return bytes;
   }
@@ -733,17 +720,6 @@ class Generator {
     bytes += setStyles(PosStyles().copyWith(align: align));
     QRCode qr = QRCode(text, size, cor);
     bytes += qr.bytes;
-    return bytes;
-  }
-
-  //0 - 17
-  //or 48 - 59
-  //TM-T82II  m = 0 – 11, 48 – 59
-  List<int> printSpeech(int level) {
-    List<int> bytes = [];
-    // FN 167. QR Code: Set the size of module
-    // pL pH fn m
-    bytes += cControlHeader.codeUnits + [0x02, 0x00, 0x32, level];
     return bytes;
   }
 
@@ -780,6 +756,7 @@ class Generator {
     bytes += emptyLines(linesAfter + 1);
     return bytes;
   }
+
   // ************************ (end) Public command generators ************************
 
   // ************************ (end) Internal command generators ************************

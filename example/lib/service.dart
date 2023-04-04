@@ -110,15 +110,15 @@ class ESCPrinterService {
     _maxPerLine = maxPerLine;
     Generator ticket = Generator(_paperSizeWidthMM!, _maxPerLine!, _profile!);
     bytes += ticket.reset();
-    // Print image
-    // final ByteData data = await rootBundle.load('assets/logo.png');
-    // final Uint8List imageBytes = data.buffer.asUint8List();
-    // final img.Image? image = img.decodeImage(imageBytes);
-    // if (image != null) {
-    //   img.Image thumbnail = img.copyResize(image, width: 400);
-    //   bytes += ticket.image(thumbnail);
-    //   bytes += ticket.reset();
-    // }
+    //Print image
+    final ByteData data = await rootBundle.load('assets/logo.png');
+    final Uint8List imageBytes = data.buffer.asUint8List();
+    final img.Image? image = img.decodeImage(imageBytes);
+    if (image != null) {
+      img.Image thumbnail = img.copyResize(image, width: 400);
+      bytes += ticket.image(thumbnail);
+      bytes += ticket.reset();
+    }
 
     // bytes += ticket.text(
     //     'Regular: aA bB cC dD eE fF gG hH iI jJ kK lL mM nN oO pP qQ rR sS tT uU vV wW xX yY zZ');

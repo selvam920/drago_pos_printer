@@ -15,10 +15,10 @@ dependencies:
     git:
       url: https://github.com/selvam920/webcontent_converter
   charset_converter: 
-  intl: 
-  path_provider:
+  intl: 0.18.0
+  path_provider: 2.0.14
   # qr_flutter: ^4.0.0
-  printing:
+  printing: any
 
   drago_pos_printer:
     path: ../
@@ -26,10 +26,11 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
-  pdf:
+  pdf: any
 
 dependency_overrides:
   charset_converter: ^2.1.0
+  win32: ^4.1.1
 
 dev_dependencies:
   flutter_test:
