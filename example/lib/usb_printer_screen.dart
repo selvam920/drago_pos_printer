@@ -120,6 +120,10 @@ class _USBPrinterScreenState extends State<USBPrinterScreen> {
                                   onPressed: () => _startPrinter(1, printer),
                                   icon: Icon(Icons.print)),
                               IconButton(
+                                  tooltip: 'Pdf',
+                                  onPressed: () => _startPrinter(2, printer),
+                                  icon: Icon(Icons.picture_as_pdf)),
+                              IconButton(
                                   tooltip: 'Html Print',
                                   onPressed: () => _startPrinter(3, printer),
                                   icon: Icon(Icons.image)),

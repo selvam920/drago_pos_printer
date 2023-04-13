@@ -7,3 +7,6 @@
 
 ## 0.0.4
 * Updated latest packages
+
+## 0.0.5
+* Updated image v4

@@ -60,11 +60,11 @@ class ESCPrinterService {
     final doc = pw.Document();
     doc.addPage(
       pw.Page(
-        pageFormat: pf.PdfPageFormat.roll80,
+        pageFormat: pf.PdfPageFormat.roll57,
         build: (pw.Context context) => pw.SizedBox(
-          height: 300 * pf.PdfPageFormat.mm,
+          height: 10 * pf.PdfPageFormat.mm,
           child: pw.Center(
-            child: pw.Text('Hello World'),
+            child: pw.Text('Hello World', style: pw.TextStyle(fontSize: 20)),
           ),
         ),
       ),
@@ -88,10 +88,9 @@ class ESCPrinterService {
     Generator generator =
         Generator(_paperSizeWidthMM!, _maxPerLine!, _profile!);
 
-    await for (var page in Printing.raster(await _generatePdf(), dpi: 203)) {
+    await for (var page in Printing.raster(await _generatePdf(), dpi: 96)) {
       final image = page.asImage();
       bytes += generator.image(image);
-      bytes += generator.feed(2);
       bytes += generator.cut();
     }
     return bytes;
