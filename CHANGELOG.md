@@ -10,3 +10,6 @@
 
 ## 0.0.5
 * Updated image v4
+
+## 0.0.6
+* Page bottom extra line optional

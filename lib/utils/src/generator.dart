@@ -393,9 +393,9 @@ class Generator {
   /// Cut the paper
   ///
   /// [mode] is used to define the full or partial cut (if supported by the priner)
-  List<int> cut({PosCutMode mode = PosCutMode.full}) {
+  List<int> cut({PosCutMode mode = PosCutMode.full, int? line}) {
     List<int> bytes = [];
-    bytes += emptyLines(5);
+    bytes += emptyLines(line ?? 3);
     if (mode == PosCutMode.partial) {
       bytes += cCutPart.codeUnits;
     } else {
@@ -575,15 +575,13 @@ class Generator {
     bytes += setStyles(PosStyles().copyWith(align: align));
 
     final Image image = Image.from(imgSrc); // make a copy
-    const bool highDensityHorizontal = true;
-    const bool highDensityVertical = true;
 
     invert(image);
     flip(image, direction: FlipDirection.horizontal);
     final Image imageRotated = copyRotate(image, angle: 270);
 
-    const int lineHeight = highDensityVertical ? 3 : 1;
-    final List<List<int>> blobs = _toColumnFormat(imageRotated, lineHeight * 8);
+    int lineHeight = 3;
+    List<List<int>> blobs = _toColumnFormat(imageRotated, lineHeight * 8);
 
     // Compress according to line density
     // Line height contains 8 or 24 pixels of src image
@@ -593,9 +591,8 @@ class Generator {
       blobs[blobInd] = _packBitsIntoBytes(blobs[blobInd]);
     }
 
-    final int heightPx = imageRotated.height;
-    const int densityByte =
-        (highDensityHorizontal ? 1 : 0) + (highDensityVertical ? 32 : 0);
+    int heightPx = imageRotated.height;
+    int densityByte = 1 + 32;
 
     final List<int> header = List.from(cBitImg.codeUnits);
     header.add(densityByte);
@@ -697,13 +694,13 @@ class Generator {
     }
 
     // Print barcode
-    final header = cBarcodePrint.codeUnits + [barcode.type!.value];
-    if (barcode.type!.value <= 6) {
+    final header = cBarcodePrint.codeUnits + [barcode.type.value];
+    if (barcode.type.value <= 6) {
       // Function A
-      bytes += header + barcode.data! + [0];
+      bytes += header + barcode.data + [0];
     } else {
       // Function B
-      bytes += header + [barcode.data!.length] + barcode.data!;
+      bytes += header + [barcode.data.length] + barcode.data;
     }
     return bytes;
   }

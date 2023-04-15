@@ -91,6 +91,7 @@ class ESCPrinterService {
     await for (var page in Printing.raster(await _generatePdf(), dpi: 96)) {
       final image = page.asImage();
       bytes += generator.image(image);
+      bytes += generator.reset();
       bytes += generator.cut();
     }
     return bytes;
