@@ -6,7 +6,7 @@ description: Demonstrates how to use the pos_printing plugin.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
 environment:
-  sdk: '>=2.19.2 <3.0.0'
+  sdk: '>=3.0.0 <4.0.0'
 
 dependencies:
   flutter:
@@ -30,7 +30,7 @@ dependencies:
 
 dependency_overrides:
   charset_converter: ^2.1.0
-  win32: ^4.1.3
+  win32: ^5.0.0
 
 dev_dependencies:
   flutter_test:

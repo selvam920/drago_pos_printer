@@ -13,3 +13,6 @@
 
 ## 0.0.6
 * Page bottom extra line optional
+
+## 0.0.7
+* Updated to flutter 3.10
