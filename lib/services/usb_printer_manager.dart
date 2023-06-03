@@ -132,7 +132,7 @@ class USBPrinterManager extends PrinterManager {
 
   @override
   Future<ConnectionResponse> writeBytes(List<int> data,
-      {bool isDisconnect = true}) async {
+      {bool isDisconnect = true, int? vendorId, int? productId}) async {
     if (Platform.isWindows) {
       try {
         if (!this.isConnected) {
@@ -196,7 +196,9 @@ class USBPrinterManager extends PrinterManager {
       /// maxChunk limit on android
       var datas = bytes.chunkBy(max);
       await Future.forEach(
-          datas, (dynamic data) async => await usbPrinter.write(data));
+          datas,
+          (dynamic data) async =>
+              await usbPrinter.write(data, super.vendorId!, super.productId!));
 
       if (isDisconnect) {
         try {

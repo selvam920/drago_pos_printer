@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:drago_pos_printer/drago_pos_printer.dart';
-import 'package:drago_pos_printer_example/webview_helper.dart';
 import 'package:webcontent_converter/webcontent_converter.dart';
 import 'demo.dart';
 import 'service.dart';

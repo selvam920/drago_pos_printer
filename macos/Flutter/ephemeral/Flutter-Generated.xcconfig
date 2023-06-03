@@ -1,10 +1,10 @@
 // This is a generated file; do not edit or check into version control.
-FLUTTER_ROOT=D:\Software\flutter_windows_3.10.0-stable
+FLUTTER_ROOT=D:\Software\flutter_windows_3.11.0-0.1.pre-beta\flutter
 FLUTTER_APPLICATION_PATH=C:\Users\sksso\Music\Github\drago_pos_printer
 COCOAPODS_PARALLEL_CODE_SIGN=true
 FLUTTER_BUILD_DIR=build
-FLUTTER_BUILD_NAME=0.0.6
-FLUTTER_BUILD_NUMBER=0.0.6
+FLUTTER_BUILD_NAME=0.0.8
+FLUTTER_BUILD_NUMBER=0.0.8
 DART_OBFUSCATION=false
 TRACK_WIDGET_CREATION=true
 TREE_SHAKE_ICONS=false

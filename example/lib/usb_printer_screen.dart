@@ -1,9 +1,9 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:drago_pos_printer/drago_pos_printer.dart';
-import 'package:drago_pos_printer_example/webview_helper.dart';
 import 'package:webcontent_converter/webcontent_converter.dart';
 import 'demo.dart';
 import 'service.dart';
@@ -177,13 +177,14 @@ class _USBPrinterScreenState extends State<USBPrinterScreen> {
                 paperSizeWidthMM: _manager!.paperSizeWidthMM,
                 maxPerLine: _manager!.maxPerLine,
                 profile: _manager!.profile)
-            : await WebcontentConverter.contentToImage(
+            : (await WebcontentConverter.contentToImage(
                 content: content,
                 executablePath: WebViewHelper.executablePath(),
-              );
+              ))
+                .toList();
     List<int> data;
     if (byteType == 3) {
-      var service = ESCPrinterService(bytes);
+      var service = ESCPrinterService(Uint8List.fromList(bytes));
       data = await service.getBytes(
         paperSizeWidthMM: _manager!.paperSizeWidthMM,
         maxPerLine: _manager!.maxPerLine,

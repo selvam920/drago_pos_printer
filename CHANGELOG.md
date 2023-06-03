@@ -16,3 +16,9 @@
 
 ## 0.0.7
 * Updated to flutter 3.10
+
+## 0.0.8
+* Fix package version
+
+## 0.0.9
+* USB Printer by vendor Id and product id
