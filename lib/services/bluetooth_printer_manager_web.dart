@@ -17,7 +17,7 @@ class BluetoothPrinterManager {
     throw Exception('Platform does not support');
   }
 
-  static Future<List<USBPrinter>> discover() {
+  static Future<List<BluetoothPrinter>> discover() {
     throw Exception('Platform does not support');
   }
 
