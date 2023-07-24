@@ -23,5 +23,5 @@
 ## 0.0.9
 * USB Printer by vendor Id and product id
 
-## 0.1.0
+## 1.0.0
 * Fix usb disconnect after print
