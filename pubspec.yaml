@@ -13,7 +13,7 @@ dependencies:
   hex: ^0.2.0
   image: ^4.0.17
   drago_blue_printer: ^0.0.3
-  drago_usb_printer: ^0.0.7
+  drago_usb_printer: ^0.0.8
   network_info_plus: ^4.0.0
   printing: ^5.10.4
   win32: ^4.1.4

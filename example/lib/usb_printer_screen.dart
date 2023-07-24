@@ -150,16 +150,6 @@ class _USBPrinterScreenState extends State<USBPrinterScreen> {
     });
   }
 
-  Future _connect(USBPrinter printer) async {
-    var profile = await CapabilityProfile.load();
-    var manager = USBPrinterManager(printer, paperWidth, charPerLine, profile);
-    await manager.connect();
-    setState(() {
-      _manager = manager;
-      printer.connected = true;
-    });
-  }
-
   _startPrinter(int byteType, USBPrinter printer) async {
     // await _connect(printer);
     var profile = await CapabilityProfile.load();

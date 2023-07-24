@@ -194,8 +194,7 @@ class USBPrinterManager extends PrinterManager {
         /// maxChunk limit on android
         var datas = bytes.chunkBy(max);
         for (var data in datas) {
-          await usbPrinter.write(
-              Uint8List.fromList(data), super.vendorId!, super.productId!);
+          await usbPrinter.write(Uint8List.fromList(data));
         }
         // await Future.forEach(
         //     datas,
