@@ -165,13 +165,13 @@ class _BluetoothPrinterScreenState extends State<BluetoothPrinterScreen> {
     late List<int> data;
     if (byteType == 1) {
       data = await ESCPrinterService(null).getSamplePosBytes(
-          paperSizeWidthMM: _manager!.paperSizeWidthMM,
-          maxPerLine: _manager!.maxPerLine,
+          paperSizeWidthMM: paperWidth,
+          maxPerLine: charPerLine,
           profile: _manager!.profile);
     } else if (byteType == 2) {
       data = await ESCPrinterService(null).getPdfBytes(
-          paperSizeWidthMM: _manager!.paperSizeWidthMM,
-          maxPerLine: _manager!.maxPerLine,
+          paperSizeWidthMM: paperWidth,
+          maxPerLine: charPerLine,
           profile: _manager!.profile);
     } else if (byteType == 3) {
       final content = Demo.getShortReceiptContent();
@@ -191,8 +191,8 @@ class _BluetoothPrinterScreenState extends State<BluetoothPrinterScreen> {
 
       var service = ESCPrinterService(htmlBytes);
       data = await service.getBytes(
-          paperSizeWidthMM: _manager!.paperSizeWidthMM,
-          maxPerLine: _manager!.maxPerLine,
+          paperSizeWidthMM: paperWidth,
+          maxPerLine: charPerLine,
           profile: _manager!.profile);
 
 //  var pdfBytes = await Printing.convertHtml(

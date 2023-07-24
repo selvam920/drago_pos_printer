@@ -111,26 +111,22 @@ class _USBPrinterScreenState extends State<USBPrinterScreen> {
                     title: Text("${printer.name}"),
                     subtitle: Text("${printer.address}"),
                     leading: Icon(Icons.usb),
-                    onTap: () => _connect(printer),
-                    trailing: printer.connected
-                        ? Wrap(
-                            children: [
-                              IconButton(
-                                  tooltip: 'ESC POS Command',
-                                  onPressed: () => _startPrinter(1, printer),
-                                  icon: Icon(Icons.print)),
-                              IconButton(
-                                  tooltip: 'Pdf',
-                                  onPressed: () => _startPrinter(2, printer),
-                                  icon: Icon(Icons.picture_as_pdf)),
-                              IconButton(
-                                  tooltip: 'Html Print',
-                                  onPressed: () => _startPrinter(3, printer),
-                                  icon: Icon(Icons.image)),
-                            ],
-                          )
-                        : null,
-                    selected: printer.connected,
+                    trailing: Wrap(
+                      children: [
+                        IconButton(
+                            tooltip: 'ESC POS Command',
+                            onPressed: () => _startPrinter(1, printer),
+                            icon: Icon(Icons.print)),
+                        IconButton(
+                            tooltip: 'Pdf',
+                            onPressed: () => _startPrinter(2, printer),
+                            icon: Icon(Icons.picture_as_pdf)),
+                        IconButton(
+                            tooltip: 'Html Print',
+                            onPressed: () => _startPrinter(3, printer),
+                            icon: Icon(Icons.image)),
+                      ],
+                    ),
                   ))
               .toList(),
         ],
@@ -165,7 +161,11 @@ class _USBPrinterScreenState extends State<USBPrinterScreen> {
   }
 
   _startPrinter(int byteType, USBPrinter printer) async {
-    await _connect(printer);
+    // await _connect(printer);
+    var profile = await CapabilityProfile.load();
+    var manager = USBPrinterManager(printer, paperWidth, charPerLine, profile);
+    _manager = manager;
+
     final content = Demo.getShortReceiptContent();
     var bytes = byteType == 1
         ? await ESCPrinterService(null).getSamplePosBytes(
@@ -199,9 +199,6 @@ class _USBPrinterScreenState extends State<USBPrinterScreen> {
       data = bytes;
     if (mounted) setState(() => _data = data);
 
-    if (_manager != null) {
-      print("isConnected ${_manager!.isConnected}");
-      _manager!.writeBytes(_data, isDisconnect: false);
-    }
+    _manager!.writeBytes(_data, isDisconnect: true);
   }
 }

@@ -186,32 +186,36 @@ class USBPrinterManager extends PrinterManager {
         return ConnectionResponse.unknown;
       }
     } else if (Platform.isAndroid) {
-      if (!this.isConnected) {
-        await connect();
-      }
+      var res = await connect();
+      if (res == ConnectionResponse.success) {
+        var bytes = Uint8List.fromList(data);
+        int max = 16384;
 
-      var bytes = Uint8List.fromList(data);
-      int max = 16384;
-
-      /// maxChunk limit on android
-      var datas = bytes.chunkBy(max);
-      await Future.forEach(
-          datas,
-          (dynamic data) async =>
-              await usbPrinter.write(data, super.vendorId!, super.productId!));
-
-      if (isDisconnect) {
-        try {
-          await usbPrinter.close();
-          this.isConnected = false;
-          this.printer.connected = false;
-        } catch (e) {
-          return ConnectionResponse.unknown;
+        /// maxChunk limit on android
+        var datas = bytes.chunkBy(max);
+        for (var data in datas) {
+          await usbPrinter.write(
+              Uint8List.fromList(data), super.vendorId!, super.productId!);
         }
+        // await Future.forEach(
+        //     datas,
+        //     (dynamic data) async =>
+        //         await usbPrinter.write(data, super.vendorId!, super.productId!));
+
+        if (isDisconnect) {
+          try {
+            await usbPrinter.close();
+            this.isConnected = false;
+            this.printer.connected = false;
+          } catch (e) {
+            return ConnectionResponse.unknown;
+          }
+        }
+        return ConnectionResponse.success;
+      } else {
+        return res;
       }
-      return ConnectionResponse.success;
-    } else {
-      return ConnectionResponse.unsupport;
     }
+    return ConnectionResponse.unsupport;
   }
 }

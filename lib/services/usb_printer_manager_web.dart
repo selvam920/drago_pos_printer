@@ -3,6 +3,17 @@ import 'package:drago_pos_printer/drago_pos_printer.dart';
 
 class USBPrinterManager {
   late CapabilityProfile profile;
+  int paperSizeWidthMM = 0;
+  int maxPerLine = 0;
+  Generator? generator;
+  bool isConnected = false;
+  String? address;
+  int? vendorId;
+  int? productId;
+  int? deviceId;
+  int port = 9100;
+  int spaceBetweenRows = 5;
+
   USBPrinterManager(
     POSPrinter printer,
     int paperSizeWidthMM,

@@ -1,6 +1,6 @@
 #!/bin/sh
 # This is a generated file; do not edit or check into version control.
-export "FLUTTER_ROOT=D:\Software\flutter_windows_3.11.0-0.1.pre-beta\flutter"
+export "FLUTTER_ROOT=D:\Software\flutter_windows_3.10.6-stable\flutter"
 export "FLUTTER_APPLICATION_PATH=C:\Users\sksso\Music\Github\drago_pos_printer"
 export "COCOAPODS_PARALLEL_CODE_SIGN=true"
 export "FLUTTER_BUILD_DIR=build"
