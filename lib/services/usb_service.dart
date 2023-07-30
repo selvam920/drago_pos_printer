@@ -11,7 +11,7 @@ class USBService {
       var results = await Printing.listPrinters();
       devices = [
         ...results
-            .where((entry) => entry.isAvailable)
+            // .where((entry) => entry.isAvailable)
             .toList()
             .map((e) => USBPrinter(
                   name: e.name,
