@@ -8,10 +8,10 @@
 
 library esc_pos_utils;
 
-export './src/barcode.dart';
-export './src/capability_profile.dart';
-export './src/enums.dart';
-export './src/pos_column.dart';
-export './src/pos_styles.dart';
-export './src/qrcode.dart';
-export './src/generator.dart';
+export 'esc_pos/barcode.dart';
+export 'esc_pos/capability_profile.dart';
+export 'esc_pos/enums.dart';
+export 'esc_pos/pos_column.dart';
+export 'esc_pos/pos_styles.dart';
+export 'esc_pos/qrcode.dart';
+export 'esc_pos/generator.dart';

@@ -12,8 +12,6 @@ import 'usb_service.dart';
 
 /// USB Printer
 class USBPrinterManager extends PrinterManager {
-  Generator? generator;
-
   /// usb_serial
   var usbPrinter = DragoUsbPrinter();
 
@@ -27,26 +25,8 @@ class USBPrinterManager extends PrinterManager {
   late int hPrinter;
   int? dwCount;
 
-  USBPrinterManager(
-    POSPrinter printer,
-    int paperSizeWidthMM,
-    int maxPerLine,
-    CapabilityProfile profile, {
-    int spaceBetweenRows = 5,
-    int port = 9100,
-  }) {
+  USBPrinterManager(POSPrinter printer) {
     super.printer = printer;
-    super.address = printer.address;
-    super.productId = printer.productId;
-    super.deviceId = printer.deviceId;
-    super.vendorId = printer.vendorId;
-    super.paperSizeWidthMM = paperSizeWidthMM;
-    super.maxPerLine = maxPerLine;
-    super.profile = profile;
-    super.spaceBetweenRows = spaceBetweenRows;
-    super.port = port;
-    generator = Generator(paperSizeWidthMM, maxPerLine, profile,
-        spaceBetweenRows: spaceBetweenRows);
   }
 
   @override
@@ -62,30 +42,26 @@ class USBPrinterManager extends PrinterManager {
 
         final phPrinter = calloc<HANDLE>();
         if (OpenPrinter(szPrinterName, phPrinter, nullptr) == FALSE) {
-          this.isConnected = false;
           this.printer.connected = false;
           return Future<ConnectionResponse>.value(
               ConnectionResponse.printerNotConnected);
         } else {
           this.hPrinter = phPrinter.value;
-          this.isConnected = true;
+
           this.printer.connected = true;
           return Future<ConnectionResponse>.value(ConnectionResponse.success);
         }
       } catch (e) {
-        this.isConnected = false;
         this.printer.connected = false;
         return Future<ConnectionResponse>.value(ConnectionResponse.timeout);
       }
     } else if (Platform.isAndroid) {
-      var usbDevice = await usbPrinter.connect(vendorId!, productId!);
+      var usbDevice =
+          await usbPrinter.connect(printer.vendorId!, printer.productId!);
       if (usbDevice != null) {
-        print("vendorId $vendorId, productId $productId ");
-        this.isConnected = true;
         this.printer.connected = true;
         return Future<ConnectionResponse>.value(ConnectionResponse.success);
       } else {
-        this.isConnected = false;
         this.printer.connected = false;
         return Future<ConnectionResponse>.value(ConnectionResponse.timeout);
       }
@@ -112,7 +88,6 @@ class USBPrinterManager extends PrinterManager {
       free(docInfo!);
       free(szPrinterName);
 
-      this.isConnected = false;
       this.printer.connected = false;
       if (timeout != null) {
         await Future.delayed(timeout, () => null);
@@ -120,7 +95,6 @@ class USBPrinterManager extends PrinterManager {
       return ConnectionResponse.success;
     } else if (Platform.isAndroid) {
       await usbPrinter.close();
-      this.isConnected = false;
       this.printer.connected = false;
       if (timeout != null) {
         await Future.delayed(timeout, () => null);
@@ -135,7 +109,7 @@ class USBPrinterManager extends PrinterManager {
       {bool isDisconnect = true, int? vendorId, int? productId}) async {
     if (Platform.isWindows) {
       try {
-        if (!this.isConnected) {
+        if (!this.printer.connected) {
           await connect();
         }
 
@@ -196,15 +170,10 @@ class USBPrinterManager extends PrinterManager {
         for (var data in datas) {
           await usbPrinter.write(Uint8List.fromList(data));
         }
-        // await Future.forEach(
-        //     datas,
-        //     (dynamic data) async =>
-        //         await usbPrinter.write(data, super.vendorId!, super.productId!));
 
         if (isDisconnect) {
           try {
             await usbPrinter.close();
-            this.isConnected = false;
             this.printer.connected = false;
           } catch (e) {
             return ConnectionResponse.unknown;

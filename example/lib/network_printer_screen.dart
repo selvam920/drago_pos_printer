@@ -165,9 +165,7 @@ class _NetWorkPrinterScreenState extends State<NetWorkPrinterScreen> {
   }
 
   Future _connect(NetWorkPrinter printer) async {
-    var profile = await CapabilityProfile.load();
-    var manager =
-        NetworkPrinterManager(printer, paperWidth, charPerLine, profile);
+    var manager = NetworkPrinterManager(printer);
     await manager.connect();
     setState(() {
       _manager = manager;
@@ -182,18 +180,18 @@ class _NetWorkPrinterScreenState extends State<NetWorkPrinterScreen> {
 
     var stopwatch = Stopwatch()..start();
     List<int> data = [];
-
+    var profile = await CapabilityProfile.load();
     if (byteType == 1) {
       data = await ESCPrinterService(null).getSamplePosBytes(
-          paperSizeWidthMM: _manager!.paperSizeWidthMM,
-          maxPerLine: _manager!.maxPerLine,
-          profile: _manager!.profile,
+          paperSizeWidthMM: paperWidth,
+          maxPerLine: charPerLine,
+          profile: profile,
           name: _name);
     } else if (byteType == 2) {
       data = await ESCPrinterService(null).getPdfBytes(
-          paperSizeWidthMM: _manager!.paperSizeWidthMM,
-          maxPerLine: _manager!.maxPerLine,
-          profile: _manager!.profile,
+          paperSizeWidthMM: paperWidth,
+          maxPerLine: charPerLine,
+          profile: profile,
           name: _name);
     } else if (byteType == 3) {
       var service = ESCPrinterService(await WebcontentConverter.contentToImage(
@@ -208,7 +206,7 @@ class _NetWorkPrinterScreenState extends State<NetWorkPrinterScreen> {
     if (mounted) setState(() => _data = data);
 
     if (_manager != null) {
-      print("isConnected ${_manager!.isConnected}");
+      print("isConnected ${_manager!.printer.connected}");
       await _manager!.writeBytes(_data, isDisconnect: true);
       WebcontentConverter.logger
           .info("completed executed in ${stopwatch.elapsed}");

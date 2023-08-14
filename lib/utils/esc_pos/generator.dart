@@ -7,8 +7,8 @@ import 'package:gbk_codec/gbk_codec.dart';
 import '../../drago_pos_printer.dart';
 import 'commands.dart';
 
-class Generator {
-  Generator(this.paperWidthMM, this.charPerLine, this._profile,
+class EscGenerator {
+  EscGenerator(this.paperWidthMM, this.charPerLine, this._profile,
       {this.spaceBetweenRows = 5,
       this.codec = latin1,
       this.fontTwoCharPerLine = 0});

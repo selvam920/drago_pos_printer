@@ -9,6 +9,7 @@ class POSPrinter {
   int? vendorId;
   int? productId;
   bool connected;
+  int? port;
   int type;
   BluetoothPrinterType get bluetoothType => type.printerType();
   ConnectionType? connectionType;

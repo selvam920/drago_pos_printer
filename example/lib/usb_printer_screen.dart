@@ -1,3 +1,4 @@
+import 'package:image/image.dart' as img;
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -114,6 +115,10 @@ class _USBPrinterScreenState extends State<USBPrinterScreen> {
                     trailing: Wrap(
                       children: [
                         IconButton(
+                            tooltip: 'Tspl Command',
+                            onPressed: () => _tsplPrint(printer),
+                            icon: Icon(Icons.qr_code)),
+                        IconButton(
                             tooltip: 'ESC POS Command',
                             onPressed: () => _startPrinter(1, printer),
                             icon: Icon(Icons.print)),
@@ -153,20 +158,20 @@ class _USBPrinterScreenState extends State<USBPrinterScreen> {
   _startPrinter(int byteType, USBPrinter printer) async {
     // await _connect(printer);
     var profile = await CapabilityProfile.load();
-    var manager = USBPrinterManager(printer, paperWidth, charPerLine, profile);
+    var manager = USBPrinterManager(printer);
     _manager = manager;
 
     final content = Demo.getShortReceiptContent();
     var bytes = byteType == 1
         ? await ESCPrinterService(null).getSamplePosBytes(
-            paperSizeWidthMM: _manager!.paperSizeWidthMM,
-            maxPerLine: _manager!.maxPerLine,
-            profile: _manager!.profile)
+            paperSizeWidthMM: paperWidth,
+            maxPerLine: charPerLine,
+            profile: profile)
         : byteType == 2
             ? await ESCPrinterService(null).getPdfBytes(
-                paperSizeWidthMM: _manager!.paperSizeWidthMM,
-                maxPerLine: _manager!.maxPerLine,
-                profile: _manager!.profile)
+                paperSizeWidthMM: paperWidth,
+                maxPerLine: charPerLine,
+                profile: profile)
             : (await WebcontentConverter.contentToImage(
                 content: content,
                 executablePath: WebViewHelper.executablePath(),
@@ -176,8 +181,8 @@ class _USBPrinterScreenState extends State<USBPrinterScreen> {
     if (byteType == 3) {
       var service = ESCPrinterService(Uint8List.fromList(bytes));
       data = await service.getBytes(
-        paperSizeWidthMM: _manager!.paperSizeWidthMM,
-        maxPerLine: _manager!.maxPerLine,
+        paperSizeWidthMM: paperWidth,
+        maxPerLine: charPerLine,
       );
       if (bytes.length > 0) {
         var dir = await getTemporaryDirectory();
@@ -190,5 +195,41 @@ class _USBPrinterScreenState extends State<USBPrinterScreen> {
     if (mounted) setState(() => _data = data);
 
     _manager!.writeBytes(_data, isDisconnect: true);
+  }
+
+  _tsplPrint(USBPrinter printer) async {
+    // await _connect(printer);
+    var manager = USBPrinterManager(printer);
+    _manager = manager;
+
+    int width = 105;
+    int height = 22;
+    int labelWidth = 35;
+
+    var image = await ESCPrinterService(null)
+        .generateLabel(width, height, labelWidth, 1.5, 3);
+
+    if (image != null) {
+      var dir = await getTemporaryDirectory();
+      var path = dir.path + "\\receipt.png";
+      File file = File(path);
+      await file.writeAsBytes(img.encodePng(image));
+
+      TsplGenerator generator = TsplGenerator();
+      generator.addSize(width: width, height: height);
+      generator.addGap(3);
+      generator.addSpeed(4);
+      generator.addDensity(Density.density15);
+      generator.addDirection(Direction.backWord);
+      generator.addTear(Tear.on);
+      generator.addCodePageUtf8();
+      generator.addCls();
+      generator.addImage(image, needGrayscale: true);
+      generator.addPrint(1);
+      _data = generator.byte;
+
+      if (mounted) setState(() {});
+      _manager!.writeBytes(_data, isDisconnect: true);
+    }
   }
 }

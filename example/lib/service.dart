@@ -33,8 +33,8 @@ class ESCPrinterService {
     _maxPerLine = maxPerLine;
     assert(receipt != null);
     assert(_profile != null);
-    Generator generator =
-        Generator(_paperSizeWidthMM!, _maxPerLine!, _profile!);
+    EscGenerator generator =
+        EscGenerator(_paperSizeWidthMM!, _maxPerLine!, _profile!);
     var decodeImage = img.decodeImage(receipt!);
     if (decodeImage == null) throw Exception('decoded image is null');
     final img.Image _resize =
@@ -53,6 +53,43 @@ class ESCPrinterService {
     bytes += generator.feed(2);
     bytes += generator.cut();
     return bytes;
+  }
+
+  Future<img.Image?> generateLabel(int width, int height, int labelWidth,
+      double horizontalGap, int column) async {
+    final doc = pw.Document();
+    doc.addPage(
+      pw.Page(
+        pageFormat: pf.PdfPageFormat(
+            width * pf.PdfPageFormat.mm, height * pf.PdfPageFormat.mm),
+        build: (pw.Context context) => pw.Row(children: [
+          for (int i = 0; i < column; i++)
+            pw.Container(
+                padding: pw.EdgeInsets.only(left: 8),
+                height: height * pf.PdfPageFormat.mm,
+                width: labelWidth * pf.PdfPageFormat.mm,
+                child: pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      pw.SizedBox(height: 5),
+                      pw.Text('Title 1', style: pw.TextStyle(fontSize: 7)),
+                      pw.SizedBox(height: 5),
+                      pw.BarcodeWidget(
+                          width: 28,
+                          height: 28,
+                          data: '324324',
+                          barcode: pw.Barcode.qrCode()),
+                      pw.SizedBox(height: 5),
+                      pw.Text('Product', style: pw.TextStyle(fontSize: 7)),
+                    ]))
+        ]),
+      ),
+    );
+
+    await for (var page in Printing.raster(await doc.save(), dpi: 200)) {
+      return page.asImage();
+    }
+    return null;
   }
 
   Future<Uint8List> _generatePdf() async {
@@ -84,8 +121,8 @@ class ESCPrinterService {
     _paperSizeWidthMM = paperSizeWidthMM;
     _maxPerLine = maxPerLine;
 
-    Generator generator =
-        Generator(_paperSizeWidthMM!, _maxPerLine!, _profile!);
+    EscGenerator generator =
+        EscGenerator(_paperSizeWidthMM!, _maxPerLine!, _profile!);
 
     await for (var page in Printing.raster(await _generatePdf(), dpi: 96)) {
       final image = page.asImage();
@@ -107,7 +144,8 @@ class ESCPrinterService {
     print(_profile!.name);
     _paperSizeWidthMM = paperSizeWidthMM;
     _maxPerLine = maxPerLine;
-    Generator ticket = Generator(_paperSizeWidthMM!, _maxPerLine!, _profile!);
+    EscGenerator ticket =
+        EscGenerator(_paperSizeWidthMM!, _maxPerLine!, _profile!);
     bytes += ticket.reset();
     //Print image
     // final ByteData data = await rootBundle.load('assets/logo.png');

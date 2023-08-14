@@ -148,9 +148,7 @@ class _BluetoothPrinterScreenState extends State<BluetoothPrinterScreen> {
   }
 
   Future _connect(BluetoothPrinter printer) async {
-    var profile = await CapabilityProfile.load();
-    var manager =
-        BluetoothPrinterManager(printer, paperWidth, charPerLine, profile);
+    var manager = BluetoothPrinterManager(printer);
     // await manager.connect();
     print(" -==== connected =====- ");
     setState(() {
@@ -160,6 +158,7 @@ class _BluetoothPrinterScreenState extends State<BluetoothPrinterScreen> {
   }
 
   _startPrinter(int byteType, BluetoothPrinter printer) async {
+    var profile = await CapabilityProfile.load();
     await _connect(printer);
 
     late List<int> data;
@@ -167,12 +166,12 @@ class _BluetoothPrinterScreenState extends State<BluetoothPrinterScreen> {
       data = await ESCPrinterService(null).getSamplePosBytes(
           paperSizeWidthMM: paperWidth,
           maxPerLine: charPerLine,
-          profile: _manager!.profile);
+          profile: profile);
     } else if (byteType == 2) {
       data = await ESCPrinterService(null).getPdfBytes(
           paperSizeWidthMM: paperWidth,
           maxPerLine: charPerLine,
-          profile: _manager!.profile);
+          profile: profile);
     } else if (byteType == 3) {
       final content = Demo.getShortReceiptContent();
 
@@ -181,36 +180,15 @@ class _BluetoothPrinterScreenState extends State<BluetoothPrinterScreen> {
         executablePath: WebViewHelper.executablePath(),
       );
 
-      // String dir = (await getTemporaryDirectory()).path;
-      // String fullPath = '$dir/abc.png';
-      // print("local file full path ${fullPath}");
-      // File file = File(fullPath);
-      // await file.writeAsBytes(htmlBytes!);
-
-      // OpenFile.open(fullPath);
-
       var service = ESCPrinterService(htmlBytes);
       data = await service.getBytes(
           paperSizeWidthMM: paperWidth,
           maxPerLine: charPerLine,
-          profile: _manager!.profile);
-
-//  var pdfBytes = await Printing.convertHtml(
-//         format: PdfPageFormat.roll57,
-//         html: content,
-//       );
-
-//       await for (var page in Printing.raster(pdfBytes, dpi: 72)) {
-//         final image = await page.toPng(); // ...or page.toPng()
-
-//         var service = ESCPrinterService(image);
-//         data = await service.getBytes();
-//       }
+          profile: profile);
     }
 
     if (_manager != null) {
       if (!await _manager!.checkConnected()) await _manager!.connect();
-      print("isConnected ${_manager!.isConnected}");
       _manager!.writeBytes(data, isDisconnect: true);
     }
   }

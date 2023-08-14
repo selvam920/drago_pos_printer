@@ -6,41 +6,22 @@ import 'printer_manager.dart';
 
 /// Network Printer
 class NetworkPrinterManager extends PrinterManager {
-  Generator? generator;
   Socket? socket;
 
-  NetworkPrinterManager(
-    POSPrinter printer,
-    int paperSizeWidthMM,
-    int maxPerLine,
-    CapabilityProfile profile, {
-    int spaceBetweenRows = 5,
-    int port = 9100,
-  }) {
+  NetworkPrinterManager(POSPrinter printer) {
     super.printer = printer;
-    super.address = printer.address;
-    super.productId = printer.productId;
-    super.deviceId = printer.deviceId;
-    super.vendorId = printer.vendorId;
-    super.paperSizeWidthMM = paperSizeWidthMM;
-    super.maxPerLine = maxPerLine;
-    super.profile = profile;
-    super.spaceBetweenRows = spaceBetweenRows;
-    super.port = port;
-    generator = Generator(paperSizeWidthMM, maxPerLine, profile,
-        spaceBetweenRows: spaceBetweenRows);
   }
 
   /// [connect] let you connect to a network printer
   Future<ConnectionResponse> connect(
       {Duration? timeout = const Duration(seconds: 5)}) async {
     try {
-      this.socket = await Socket.connect(address, port, timeout: timeout);
-      this.isConnected = true;
+      this.socket = await Socket.connect(printer.address, printer.port!,
+          timeout: timeout);
+
       this.printer.connected = true;
       return Future<ConnectionResponse>.value(ConnectionResponse.success);
     } catch (e) {
-      this.isConnected = false;
       this.printer.connected = false;
       return Future<ConnectionResponse>.value(ConnectionResponse.timeout);
     }
@@ -66,7 +47,7 @@ class NetworkPrinterManager extends PrinterManager {
   Future<ConnectionResponse> writeBytes(List<int> data,
       {bool isDisconnect = true}) async {
     try {
-      if (!isConnected) {
+      if (!printer.connected) {
         await connect();
       }
       print(this.socket);
@@ -84,7 +65,7 @@ class NetworkPrinterManager extends PrinterManager {
   Future<ConnectionResponse> disconnect({Duration? timeout}) async {
     await socket?.flush();
     await socket?.close();
-    this.isConnected = false;
+    this.printer.connected = false;
     if (timeout != null) {
       await Future.delayed(timeout, () => null);
     }
