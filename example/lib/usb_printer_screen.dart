@@ -8,6 +8,7 @@ import 'package:drago_pos_printer/drago_pos_printer.dart';
 import 'package:webcontent_converter/webcontent_converter.dart';
 import 'demo.dart';
 import 'service.dart';
+import 'package:open_filex/open_filex.dart';
 
 class USBPrinterScreen extends StatefulWidget {
   @override
@@ -156,7 +157,6 @@ class _USBPrinterScreenState extends State<USBPrinterScreen> {
   }
 
   _startPrinter(int byteType, USBPrinter printer) async {
-    // await _connect(printer);
     var profile = await CapabilityProfile.load();
     var manager = USBPrinterManager(printer);
     _manager = manager;
@@ -194,14 +194,10 @@ class _USBPrinterScreenState extends State<USBPrinterScreen> {
       data = bytes;
     if (mounted) setState(() => _data = data);
 
-    _manager!.writeBytes(_data, isDisconnect: true);
+    _manager!.writeBytes(_data);
   }
 
   _tsplPrint(USBPrinter printer) async {
-    // await _connect(printer);
-    var manager = USBPrinterManager(printer);
-    _manager = manager;
-
     int width = 105;
     int height = 22;
     int labelWidth = 35;
@@ -214,22 +210,23 @@ class _USBPrinterScreenState extends State<USBPrinterScreen> {
       var path = dir.path + "\\receipt.png";
       File file = File(path);
       await file.writeAsBytes(img.encodePng(image));
-
-      TsplGenerator generator = TsplGenerator();
-      generator.addSize(width: width, height: height);
-      generator.addGap(3);
-      generator.addSpeed(4);
-      generator.addDensity(Density.density15);
-      generator.addDirection(Direction.backWord);
-      generator.addTear(Tear.on);
-      generator.addCodePageUtf8();
-      generator.addCls();
-      generator.addImage(image, needGrayscale: true);
-      generator.addPrint(1);
-      _data = generator.byte;
-
-      if (mounted) setState(() {});
-      _manager!.writeBytes(_data, isDisconnect: true);
+      OpenFilex.open(path);
+      // for (int i = 1; i <= 1; i++) {
+      //   var manager = USBPrinterManager(printer);
+      //   TsplGenerator generator = TsplGenerator();
+      //   generator.addSize(width: width, height: height);
+      //   generator.addGap(3);
+      //   generator.addSpeed(4);
+      //   generator.addDensity(Density.density15);
+      //   generator.addDirection(Direction.backWord);
+      //   generator.addTear(Tear.on);
+      //   generator.addCodePageUtf8();
+      //   generator.addCls();
+      //   generator.addImage(image, needGrayscale: true);
+      //   generator.addPrint(1);
+      //   _data = generator.byte;
+      //   manager.writeBytes(_data);
+      // }
     }
   }
 }

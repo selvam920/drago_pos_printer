@@ -17,8 +17,7 @@ class USBPrinterManager {
     throw Exception('Platform does not support');
   }
 
-  Future<ConnectionResponse> writeBytes(List<int> data,
-      {bool isDisconnect = true}) {
+  Future<ConnectionResponse> writeBytes(List<int> data) {
     throw Exception('Platform does not support');
   }
 }

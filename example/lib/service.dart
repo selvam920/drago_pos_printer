@@ -7,6 +7,7 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:drago_pos_printer/drago_pos_printer.dart';
 import 'package:printing/printing.dart';
 // import 'package:qr_flutter/qr_flutter.dart';
+import 'dart:math' as math;
 
 class ESCPrinterService {
   final Uint8List? receipt;
@@ -64,29 +65,88 @@ class ESCPrinterService {
             width * pf.PdfPageFormat.mm, height * pf.PdfPageFormat.mm),
         build: (pw.Context context) => pw.Row(children: [
           for (int i = 0; i < column; i++)
-            pw.Container(
-                padding: pw.EdgeInsets.only(left: 8),
-                height: height * pf.PdfPageFormat.mm,
-                width: labelWidth * pf.PdfPageFormat.mm,
-                child: pw.Column(
-                    crossAxisAlignment: pw.CrossAxisAlignment.start,
-                    children: [
-                      pw.SizedBox(height: 5),
-                      pw.Text('Title 1', style: pw.TextStyle(fontSize: 7)),
-                      pw.SizedBox(height: 5),
-                      pw.BarcodeWidget(
-                          width: 28,
-                          height: 28,
-                          data: '324324',
-                          barcode: pw.Barcode.qrCode()),
-                      pw.SizedBox(height: 5),
-                      pw.Text('Product', style: pw.TextStyle(fontSize: 7)),
-                    ]))
+            pw.Expanded(
+                child: pw.Center(
+                    child: pw.Column(
+                        crossAxisAlignment: pw.CrossAxisAlignment.start,
+                        mainAxisAlignment: pw.MainAxisAlignment.center,
+                        children: [
+                  pw.SizedBox(height: 5),
+                  pw.Text('Bodi ananatham department',
+                      style: pw.TextStyle(fontSize: 6),
+                      overflow: pw.TextOverflow.clip),
+                  pw.SizedBox(height: 1),
+                  //barcode
+                  pw.BarcodeWidget(
+                      width: 90,
+                      height: 28,
+                      data: '324324',
+                      barcode: pw.Barcode.code39()),
+                  //qr code
+                  pw.Row(children: [
+                    pw.Container(
+                      width: 3,
+                      child: pw.Transform.rotateBox(
+                        angle: math.pi / 180,
+                        child: pw.Text(
+                          '13232',
+                          style: pw.TextStyle(fontSize: 5),
+                        ),
+                      ),
+                    ),
+                    pw.SizedBox(width: 2),
+                    pw.BarcodeWidget(
+                        width: 26,
+                        height: 26,
+                        data: '324324',
+                        barcode: pw.Barcode.qrCode()),
+                    pw.SizedBox(width: 5),
+                    pw.Expanded(
+                        child: pw.Column(children: [
+                      pw.Row(children: [
+                        pw.Expanded(
+                            child: pw.Text('Rate',
+                                style: pw.TextStyle(fontSize: 6))),
+                        pw.Expanded(
+                            child: pw.Text('0.52',
+                                style: pw.TextStyle(fontSize: 6))),
+                      ]),
+                      pw.Row(children: [
+                        pw.Expanded(
+                            child: pw.Text('MRP',
+                                style: pw.TextStyle(fontSize: 6))),
+                        pw.Expanded(
+                            child: pw.Text('0.52',
+                                style: pw.TextStyle(fontSize: 6))),
+                      ]),
+                      pw.Row(children: [
+                        pw.Expanded(
+                            child: pw.Text('Mfd',
+                                style: pw.TextStyle(fontSize: 6))),
+                        pw.Expanded(
+                            child: pw.Text('02/20/23',
+                                style: pw.TextStyle(fontSize: 6))),
+                      ]),
+                      pw.Row(children: [
+                        pw.Expanded(
+                            child: pw.Text('Expiry',
+                                style: pw.TextStyle(fontSize: 6))),
+                        pw.Expanded(
+                            child: pw.Text('02/20/23',
+                                style: pw.TextStyle(fontSize: 6))),
+                      ]),
+                    ])),
+                    pw.SizedBox(width: 3),
+                  ]),
+                  pw.SizedBox(height: 1.5),
+                  pw.Text('200g Horlicks Choclate flavor [iyj fdgdfgdf dfgdfg]',
+                      style: pw.TextStyle(fontSize: 6)),
+                ])))
         ]),
       ),
     );
 
-    await for (var page in Printing.raster(await doc.save(), dpi: 200)) {
+    await for (var page in Printing.raster(await doc.save(), dpi: 203)) {
       return page.asImage();
     }
     return null;

@@ -106,12 +106,10 @@ class USBPrinterManager extends PrinterManager {
 
   @override
   Future<ConnectionResponse> writeBytes(List<int> data,
-      {bool isDisconnect = true, int? vendorId, int? productId}) async {
+      {int? vendorId, int? productId}) async {
     if (Platform.isWindows) {
       try {
-        if (!this.printer.connected) {
-          await connect();
-        }
+        await connect();
 
         // Inform the spooler the document is beginning.
         final dwJob = StartDocPrinter(hPrinter, 1, docInfo!);
@@ -150,11 +148,10 @@ class USBPrinterManager extends PrinterManager {
         // Check to see if correct number of bytes were written.
         if (dwBytesWritten!.value != dwCount) {}
 
-        if (isDisconnect) {
-          // Tidy up the printer handle.
-          ClosePrinter(hPrinter);
-          // await disconnect();
-        }
+        // Tidy up the printer handle.
+        ClosePrinter(hPrinter);
+        // await disconnect();
+
         return ConnectionResponse.success;
       } catch (e) {
         return ConnectionResponse.unknown;
@@ -171,14 +168,13 @@ class USBPrinterManager extends PrinterManager {
           await usbPrinter.write(Uint8List.fromList(data));
         }
 
-        if (isDisconnect) {
-          try {
-            await usbPrinter.close();
-            this.printer.connected = false;
-          } catch (e) {
-            return ConnectionResponse.unknown;
-          }
+        try {
+          await usbPrinter.close();
+          this.printer.connected = false;
+        } catch (e) {
+          return ConnectionResponse.unknown;
         }
+
         return ConnectionResponse.success;
       } else {
         return res;
