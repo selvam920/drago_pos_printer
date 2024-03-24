@@ -11,13 +11,13 @@ dependencies:
   flutter:
     sdk: flutter
   hex: ^0.2.0
-  image: ^4.0.17
+  image: ^4.1.7
   drago_blue_printer: ^0.0.3
   drago_usb_printer: ^0.0.8
-  network_info_plus: ^4.0.0
-  printing: ^5.10.4
-  win32: ^4.1.4
-  ffi: ^2.0.1
+  network_info_plus: ^5.0.2
+  printing: ^5.12.0
+  win32: ^5.3.0
+  ffi: ^2.1.2
   gbk_codec: ^0.4.0
 
 dev_dependencies:
