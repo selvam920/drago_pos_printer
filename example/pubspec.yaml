@@ -15,8 +15,8 @@ dependencies:
     git:
       url: https://github.com/selvam920/webcontent_converter
   charset_converter: 
-  intl: 0.18.0
-  path_provider: 2.0.14
+  intl: ^0.19.0
+  path_provider: ^2.0.14
   # qr_flutter: ^4.0.0
   printing: any
 
