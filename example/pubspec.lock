@@ -117,18 +117,26 @@ packages:
     dependency: transitive
     description:
       name: dio
-      sha256: "11e40df547d418cc0c4900a9318b26304e665da6fa4755399a9ff9efd09034b5"
+      sha256: e17f6b3097b8c51b72c74c9f071a605c47bcc8893839bd66732457a5ebe73714
       url: "https://pub.dev"
     source: hosted
-    version: "5.4.3+1"
+    version: "5.5.0+1"
+  dio_web_adapter:
+    dependency: transitive
+    description:
+      name: dio_web_adapter
+      sha256: "36c5b2d79eb17cdae41e974b7a8284fec631651d2a6f39a8a2ff22327e90aeac"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.1"
   drago_blue_printer:
     dependency: transitive
     description:
       name: drago_blue_printer
-      sha256: "4d65f16a39baca1e2d684332974e18491907ed0891a838a43ea4f7c4f6fa2c8d"
+      sha256: "6061629cec01d9bcfab72c318d684d164c5067dcb21a9ad0a635649448be04ae"
       url: "https://pub.dev"
     source: hosted
-    version: "0.0.4"
+    version: "0.0.5"
   drago_pos_printer:
     dependency: "direct main"
     description:
@@ -140,10 +148,10 @@ packages:
     dependency: transitive
     description:
       name: drago_usb_printer
-      sha256: cb0f105fead95cd3b6f241b9c8d9a9d1d02ac16179d3f8f54d0181a0988b8991
+      sha256: "713cf99ba8b190dff495f53435fbaa2ddeeab8e28787683f7d4dd74698067aa8"
       url: "https://pub.dev"
     source: hosted
-    version: "0.0.8"
+    version: "0.0.9"
   easy_logger:
     dependency: transitive
     description:
@@ -219,10 +227,10 @@ packages:
     dependency: transitive
     description:
       name: http
-      sha256: "761a297c042deedc1ffbb156d6e2af13886bb305c2a343a4d972504cd67dd938"
+      sha256: b9c29a161230ee03d3ccf545097fccd9b87a5264228c5d348202e0f0c28f9010
       url: "https://pub.dev"
     source: hosted
-    version: "1.2.1"
+    version: "1.2.2"
   http_parser:
     dependency: transitive
     description:
@@ -315,26 +323,26 @@ packages:
     dependency: transitive
     description:
       name: meta
-      sha256: "25dfcaf170a0190f47ca6355bdd4552cb8924b430512ff0cafb8db9bd41fe33b"
+      sha256: bdb68674043280c3428e9ec998512fb681678676b3c54e773629ffe74419f8c7
       url: "https://pub.dev"
     source: hosted
-    version: "1.14.0"
+    version: "1.15.0"
   network_info_plus:
     dependency: transitive
     description:
       name: network_info_plus
-      sha256: "5bd4b86e28fed5ed4e6ac7764133c031dfb7d3f46aa2a81b46f55038aa78ecc0"
+      sha256: "0754302af09e58a60c7cd6800029d00e03c68f289a19fd9df31941ab91da8903"
       url: "https://pub.dev"
     source: hosted
-    version: "5.0.3"
+    version: "6.0.0"
   network_info_plus_platform_interface:
     dependency: transitive
     description:
       name: network_info_plus_platform_interface
-      sha256: "2e193d61d3072ac17824638793d3b89c6d581ce90c11604f4ca87311b42f2706"
+      sha256: b7f35f4a7baef511159e524499f3c15464a49faa5ec10e92ee0bce265e664906
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.0"
+    version: "2.0.1"
   nm:
     dependency: transitive
     description:
@@ -371,18 +379,18 @@ packages:
     dependency: "direct main"
     description:
       name: path_provider
-      sha256: c9e7d3a4cd1410877472158bee69963a4579f78b68c65a2b7d40d1a7a88bb161
+      sha256: fec0d61223fba3154d87759e3cc27fe2c8dc498f6386c6d6fc80d1afdd1bf378
       url: "https://pub.dev"
     source: hosted
-    version: "2.1.3"
+    version: "2.1.4"
   path_provider_android:
     dependency: transitive
     description:
       name: path_provider_android
-      sha256: bca87b0165ffd7cdb9cad8edd22d18d2201e886d9a9f19b4fb3452ea7df3a72a
+      sha256: "490539678396d4c3c0b06efdaab75ae60675c3e0c66f72bc04c2e2c1e0e2abeb"
       url: "https://pub.dev"
     source: hosted
-    version: "2.2.6"
+    version: "2.2.9"
   path_provider_foundation:
     dependency: transitive
     description:
@@ -411,10 +419,10 @@ packages:
     dependency: transitive
     description:
       name: path_provider_windows
-      sha256: "8bc9f22eee8690981c22aa7fc602f5c85b497a6fb2ceb35ee5a5e5ed85ad8170"
+      sha256: bd6f00dbd873bfb70d0761682da2b3a2c2fccc2b9e84c495821639601d81afe7
       url: "https://pub.dev"
     source: hosted
-    version: "2.2.1"
+    version: "2.3.0"
   pdf:
     dependency: "direct main"
     description:
@@ -459,10 +467,10 @@ packages:
     dependency: transitive
     description:
       name: permission_handler_html
-      sha256: "54bf176b90f6eddd4ece307e2c06cf977fb3973719c35a93b85cc7093eb6070d"
+      sha256: "6cac773d389e045a8d4f85418d07ad58ef9e42a56e063629ce14c4c26344de24"
       url: "https://pub.dev"
     source: hosted
-    version: "0.1.1"
+    version: "0.1.2"
   permission_handler_platform_interface:
     dependency: transitive
     description:
@@ -531,10 +539,10 @@ packages:
     dependency: transitive
     description:
       name: qr
-      sha256: "64957a3930367bf97cc211a5af99551d630f2f4625e38af10edd6b19131b64b3"
+      sha256: "5a1d2586170e172b8a8c8470bbbffd5eb0cd38a66c0d77155ea138d3af3a4445"
       url: "https://pub.dev"
     source: hosted
-    version: "3.0.1"
+    version: "3.0.2"
   sky_engine:
     dependency: transitive
     description: flutter
@@ -568,10 +576,10 @@ packages:
     dependency: transitive
     description:
       name: string_scanner
-      sha256: "556692adab6cfa87322a115640c11f13cb77b3f076ddcc5d6ae3c20242bedcde"
+      sha256: "688af5ed3402a4bde5b3a6c15fd768dbf2621a614950b17f04626c431ab3c4c3"
       url: "https://pub.dev"
     source: hosted
-    version: "1.2.0"
+    version: "1.3.0"
   term_glyph:
     dependency: transitive
     description:
@@ -584,10 +592,10 @@ packages:
     dependency: transitive
     description:
       name: test_api
-      sha256: "5b8a98dafc4d5c4c9c72d8b31ab2b23fc13422348d2997120294d3bac86b4ddb"
+      sha256: "664d3a9a64782fcdeb83ce9c6b39e78fd2971d4e37827b9b06c3aa1edc5e760c"
       url: "https://pub.dev"
     source: hosted
-    version: "0.7.2"
+    version: "0.7.3"
   typed_data:
     dependency: transitive
     description:
@@ -625,7 +633,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: f80a9567008d683a5e8eb61c82997f3f366f46d7
+      resolved-ref: f2eba340d96126a712b07a5e980238ab6367f61b
       url: "https://github.com/selvam920/webcontent_converter"
     source: git
     version: "0.0.8+3"
@@ -633,10 +641,10 @@ packages:
     dependency: "direct overridden"
     description:
       name: win32
-      sha256: a79dbe579cb51ecd6d30b17e0cae4e0ea15e2c0e66f69ad4198f22a6789e94f4
+      sha256: "015002c060f1ae9f41a818f2d5640389cc05283e368be19dc8d77cecb43c40c9"
       url: "https://pub.dev"
     source: hosted
-    version: "5.5.1"
+    version: "5.5.3"
   xdg_directories:
     dependency: transitive
     description:
