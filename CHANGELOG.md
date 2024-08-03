@@ -25,3 +25,6 @@
 
 ## 1.0.0
 * Fix usb disconnect after print
+
+## 1.0.1
+* Upgrade gradle to > 8.0
