@@ -2,7 +2,7 @@ group 'com.example.drago_pos_printer'
 version '1.0-SNAPSHOT'
 
 buildscript {
-    ext.kotlin_version = '1.7.10'
+    ext.kotlin_version = '1.7.20'
     repositories {
         google()
         mavenCentral()
@@ -29,7 +29,7 @@ android {
         namespace = "com.example.drago_pos_printer"
     }
 
-    compileSdkVersion 31
+    compileSdk = 34
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8

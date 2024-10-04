@@ -28,3 +28,9 @@
 
 ## 1.0.1
 * Upgrade gradle to > 8.0
+
+## 1.0.2
+* Update network discovery logic
+
+## 1.0.3
+* Issue fix
