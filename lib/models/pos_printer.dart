@@ -8,7 +8,6 @@ class POSPrinter {
   int? deviceId;
   int? vendorId;
   int? productId;
-  bool connected;
   int? port;
   int type;
   BluetoothPrinterType get bluetoothType => type.printerType();
@@ -23,7 +22,6 @@ class POSPrinter {
     this.deviceId,
     this.vendorId,
     this.productId,
-    this.connected = false,
     this.type = 0,
     this.connectionType,
   });

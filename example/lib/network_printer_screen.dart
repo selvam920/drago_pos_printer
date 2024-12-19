@@ -12,8 +12,6 @@ class NetWorkPrinterScreen extends StatefulWidget {
 class _NetWorkPrinterScreenState extends State<NetWorkPrinterScreen> {
   bool _isLoading = false;
   List<NetWorkPrinter> _printers = [];
-  NetworkPrinterManager? _manager;
-  List<int> _data = [];
   String _name = "default";
 
   int paperWidth = 0;
@@ -122,26 +120,21 @@ class _NetWorkPrinterScreenState extends State<NetWorkPrinterScreen> {
           SizedBox(height: 10),
           ..._printers
               .map((printer) => ListTile(
-                    title: Text("${printer.name}"),
-                    subtitle: Text("${printer.address}"),
-                    leading: Icon(Icons.cable),
-                    onTap: () => _connect(printer),
-                    trailing: printer.connected
-                        ? Wrap(
-                            children: [
-                              IconButton(
-                                  tooltip: 'ESC POS Command',
-                                  onPressed: () => _startPrinter(1, printer),
-                                  icon: Icon(Icons.print)),
-                              IconButton(
-                                  tooltip: 'Html Print',
-                                  onPressed: () => _startPrinter(3, printer),
-                                  icon: Icon(Icons.image)),
-                            ],
-                          )
-                        : null,
-                    selected: printer.connected,
-                  ))
+                  title: Text("${printer.name}"),
+                  subtitle: Text("${printer.address}"),
+                  leading: Icon(Icons.cable),
+                  trailing: Wrap(
+                    children: [
+                      IconButton(
+                          tooltip: 'ESC POS Command',
+                          onPressed: () => _print(1, printer),
+                          icon: Icon(Icons.print)),
+                      IconButton(
+                          tooltip: 'Html Print',
+                          onPressed: () => _print(3, printer),
+                          icon: Icon(Icons.image)),
+                    ],
+                  )))
               .toList(),
         ],
       ),
@@ -164,17 +157,10 @@ class _NetWorkPrinterScreenState extends State<NetWorkPrinterScreen> {
     });
   }
 
-  Future _connect(NetWorkPrinter printer) async {
+  _print(int byteType, NetWorkPrinter printer) async {
     var manager = NetworkPrinterManager(printer);
     await manager.connect();
-    setState(() {
-      _manager = manager;
-      printer.connected = true;
-    });
-  }
 
-  _startPrinter(int byteType, NetWorkPrinter printer) async {
-    await _connect(printer);
     // if (_data.isEmpty) {
     final content = Demo.getShortReceiptContent();
 
@@ -201,15 +187,9 @@ class _NetWorkPrinterScreenState extends State<NetWorkPrinterScreen> {
       data = await service.getBytes(name: _name);
     }
 
-    print("Start print data $_name");
-
-    if (mounted) setState(() => _data = data);
-
-    if (_manager != null) {
-      print("isConnected ${_manager!.printer.connected}");
-      await _manager!.writeBytes(_data, isDisconnect: true);
-      WebcontentConverter.logger
-          .info("completed executed in ${stopwatch.elapsed}");
-    }
+    await manager.writeBytes(data);
+    WebcontentConverter.logger
+        .info("completed executed in ${stopwatch.elapsed}");
+    await manager.disconnect();
   }
 }

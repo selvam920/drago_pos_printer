@@ -13,17 +13,12 @@ class NetworkPrinterManager extends PrinterManager {
   }
 
   /// [connect] let you connect to a network printer
-  Future<ConnectionResponse> connect(
-      {Duration? timeout = const Duration(seconds: 5)}) async {
+  Future connect({Duration? timeout = const Duration(seconds: 5)}) async {
     try {
       this.socket = await Socket.connect(printer.address, printer.port!,
           timeout: timeout);
-
-      this.printer.connected = true;
-      return Future<ConnectionResponse>.value(ConnectionResponse.success);
     } catch (e) {
-      this.printer.connected = false;
-      return Future<ConnectionResponse>.value(ConnectionResponse.timeout);
+      return Future.error(e.toString());
     }
   }
 
@@ -44,31 +39,20 @@ class NetworkPrinterManager extends PrinterManager {
 
   /// [writeBytes] let you write raw list int data into socket
   @override
-  Future<ConnectionResponse> writeBytes(List<int> data,
-      {bool isDisconnect = true}) async {
+  Future writeBytes(List<int> data) async {
     try {
-      if (!printer.connected) {
-        await connect();
-      }
-      print(this.socket);
       this.socket?.add(data);
-      if (isDisconnect) {
-        await disconnect();
-      }
-      return ConnectionResponse.success;
     } catch (e) {
-      return ConnectionResponse.printerNotConnected;
+      return Future.error(e.toString());
     }
   }
 
   /// [timeout]: milliseconds to wait after closing the socket
-  Future<ConnectionResponse> disconnect({Duration? timeout}) async {
+  Future disconnect({Duration? timeout}) async {
     await socket?.flush();
     await socket?.close();
-    this.printer.connected = false;
     if (timeout != null) {
       await Future.delayed(timeout, () => null);
     }
-    return ConnectionResponse.success;
   }
 }

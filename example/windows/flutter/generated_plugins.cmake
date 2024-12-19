@@ -6,7 +6,6 @@ list(APPEND FLUTTER_PLUGIN_LIST
   charset_converter
   connectivity_plus
   drago_pos_printer
-  permission_handler_windows
   printing
 )
 

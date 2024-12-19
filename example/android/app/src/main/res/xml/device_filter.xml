@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+   
+    <!-- 0x1CBE / 0x0003: USB POS printer 58 mm -->
+    <usb-device vendor-id="7358" product-id="3" />
+    <!-- 0x1CB0 / 0x0003: USB POS printer 58 mm -->
+    <usb-device vendor-id="7344" product-id="3" />
+    <!-- 0x0483 / 0x5740: USB POS printer 58 mm -->
+    <usb-device vendor-id="1155" product-id="22336" />
+    <!-- 0x0493 / 0x8760: USB POS printer 58 mm -->
+    <usb-device vendor-id="1171" product-id="34656" />
+    <!-- 0x0416 / 0x5011: USB POS printer 58 mm (Issyzone Pos IMP006B) -->
+    <usb-device vendor-id="1046" product-id="20497" />
+    <!-- 0x0416 / 0xAABB: USB POS printer 58 mm -->
+    <usb-device vendor-id="1046" product-id="43707" />
+    <!-- 0x1659 / 0x8965: USB POS printer 58 mm -->
+    <usb-device vendor-id="5721" product-id="35173" />
+    <!-- 0x0483 / 0x5741: USB POS printer 58 mm -->
+    <usb-device vendor-id="1155" product-id="22337" />
+    <!-- 0x4B43 / 0x3830: USB POS printer 80 mm (GoojPrt MTP-3) -->
+    <usb-device vendor-id="19267" product-id="14384" />
+    <!-- 0x0525 / 0xA700: USB POS printer 80 mm (MicroPOS WTP100II) -->
+    <usb-device vendor-id="1317" product-id="42752" />
+    <!-- 0x0525 / 0xA702: USB POS printer 58 mm (Sewoo LK-P20) -->
+    <usb-device vendor-id="1317" product-id="42754" />
+    <!-- 0x0416 / 0x5011: USB POS printer 58 mm -->
+    <usb-device vendor-id="1046" product-id="20497" /> 
+    <usb-device vendor-id="04b8" product-id="0e20"/>
+    <usb-device vendor-id="04b8" product-id="0202"/>
+    <usb-device vendor-id="0519" product-id="0003"/>
+    <usb-device vendor-id="04b8h" product-id="0202h"/>
+    <usb-device vendor-id="1317" product-id="42752"/>
+    <usb-device vendor-id="0525" product-id="a700"/>
+    <!-- Milestone thermal/barcode printer -->
+    <usb-device vendor-id="1155" product-id="22304"/>
+     
+</resources>

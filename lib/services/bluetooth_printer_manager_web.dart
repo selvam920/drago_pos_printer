@@ -9,10 +9,6 @@ class BluetoothPrinterManager {
     throw Exception('Platform does not support');
   }
 
-  Future<bool> checkConnected() async {
-    throw Exception('Platform does not support');
-  }
-
   static Future<List<BluetoothPrinter>> discover() {
     throw Exception('Platform does not support');
   }
@@ -21,8 +17,7 @@ class BluetoothPrinterManager {
     throw Exception('Platform does not support');
   }
 
-  Future<ConnectionResponse> writeBytes(List<int> data,
-      {bool isDisconnect = true}) {
+  Future<ConnectionResponse> writeBytes(List<int> data) {
     throw Exception('Platform does not support');
   }
 }

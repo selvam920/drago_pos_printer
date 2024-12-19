@@ -1,18 +1,12 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
-import 'package:drago_blue_printer/drago_blue_printer.dart' as themal;
 import 'package:drago_pos_printer/models/pos_printer.dart';
 import 'package:drago_pos_printer/drago_pos_printer.dart';
-import 'bluetooth_service.dart';
+import 'package:drago_pos_printer/services/chennel.dart';
 import 'printer_manager.dart';
 
 /// Bluetooth Printer
 class BluetoothPrinterManager extends PrinterManager {
-  themal.DragoBluePrinter bluetooth = themal.DragoBluePrinter.instance;
-  // fblue.FlutterBlue flutterBlue = fblue.FlutterBlue.instance;
-  // fblue.BluetoothDevice fbdevice;
-
   BluetoothPrinterManager(
     POSPrinter printer,
   ) {
@@ -20,119 +14,72 @@ class BluetoothPrinterManager extends PrinterManager {
   }
 
   /// [connect] let you connect to a bluetooth printer
-  Future<ConnectionResponse> connect(
-      {Duration? timeout = const Duration(seconds: 5)}) async {
+  Future connect({Duration? timeout = const Duration(seconds: 5)}) async {
     try {
-      // if (Platform.isIOS) {
-      // fbdevice = fblue.BluetoothDevice.fromProto(proto.BluetoothDevice(
-      //     name: printer.name,
-      //     remoteId: printer.address,
-      //     type: proto.BluetoothDevice_Type.valueOf(printer.type)));
-      // var connected = await flutterBlue.connectedDevices;
-      // var index = connected?.indexWhere((e) => e.id == fbdevice.id);
-      // if (index < 0) await fbdevice.connect();
-
-      // } else
-      if (Platform.isAndroid || Platform.isIOS) {
-        var device = themal.BluetoothDevice(printer.name, printer.address);
-        await bluetooth.connect(device);
+      if (Platform.isAndroid) {
+        Map<String, dynamic> params = {
+          "address": printer.address,
+          "isBle": false,
+          "autoConnect": true
+        };
+        await flutterPrinterChannel.invokeMethod('onStartConnection', params);
+      } else if (Platform.isIOS) {
+        Map<String, dynamic> params = {
+          "name": printer.name,
+          "address": printer.address
+        };
+        await iosChannel.invokeMethod('connect', params);
       }
-
-      this.printer.connected = true;
-      return Future<ConnectionResponse>.value(ConnectionResponse.success);
     } catch (e) {
       if ((e as dynamic).message == "already connected") {
         await disconnect();
         await connect();
-
-        this.printer.connected = true;
-        return Future<ConnectionResponse>.value(ConnectionResponse.success);
-      } else {
-        this.printer.connected = false;
-        return Future<ConnectionResponse>.value(ConnectionResponse.timeout);
-      }
+      } else
+        return Future.error(e.toString());
     }
-  }
-
-  /// [connect] let you connect to a bluetooth printer
-  Future<bool> checkConnected() async {
-    try {
-      if (Platform.isAndroid || Platform.isIOS) {
-        var device = themal.BluetoothDevice(printer.name, printer.address);
-        return (await bluetooth.isDeviceConnected(device)) ?? false;
-      }
-    } catch (e) {}
-
-    return Future<bool>.value(false);
   }
 
   /// [discover] let you explore all bluetooth printer nearby your device
   static Future<List<BluetoothPrinter>> discover() async {
-    var results = await BluetoothService.findBluetoothDevice();
-    return [
-      ...results
-          .map((e) => BluetoothPrinter(
-                id: e.address,
-                name: e.name,
-                address: e.address,
-                type: e.type,
-              ))
-          .toList()
-    ];
+    var results = await flutterPrinterChannel.invokeMethod('getBluetoothList');
+    return List.from(results)
+        .map((r) => BluetoothPrinter(
+              name: r['name'],
+              address: r['address'],
+            ))
+        .toList();
   }
 
   /// [writeBytes] let you write raw list int data into socket
   @override
-  Future<ConnectionResponse> writeBytes(List<int> data,
-      {bool isDisconnect = true,
-      Duration? timeout = const Duration(milliseconds: 20)}) async {
+  Future writeBytes(List<int> bytes,
+      {Duration? timeout = const Duration(milliseconds: 20)}) async {
     try {
-      if (!printer.connected) {
-        await connect();
+      if (Platform.isAndroid) {
+        Map<String, dynamic> params = {"bytes": bytes};
+        await flutterPrinterChannel.invokeMethod('sendDataByte', params);
+      } else if (Platform.isIOS) {
+        Map<String, Object> args = Map();
+        args['bytes'] = bytes;
+        args['length'] = bytes.length;
+        iosChannel.invokeMethod('writeData', args);
       }
-      if (Platform.isAndroid || Platform.isIOS) {
-        if ((await bluetooth.isConnected) ?? false) {
-          if (timeout != null) {
-            await Future.delayed(timeout, () => null);
-          }
-          Uint8List message = Uint8List.fromList(data);
-          await bluetooth.writeBytes(message);
-          if (isDisconnect) {
-            await disconnect();
-          }
-          return ConnectionResponse.success;
-        }
-        return ConnectionResponse.printerNotConnected;
-      }
-      //  else if (Platform.isIOS) {
-      //   // var services = (await fbdevice.discoverServices());
-      //   // var service = services.firstWhere((e) => e.isPrimary);
-      //   // var charactor =
-      //   //     service.characteristics.firstWhere((e) => e.properties.write);
-      //   // await charactor?.write(data, withoutResponse: true);
-      //   return ConnectionResponse.success;
-      // }
-      return ConnectionResponse.unsupport;
     } catch (e) {
-      print("Error : $e");
-      return ConnectionResponse.unknown;
+      return Future.error(e.toString());
     }
   }
 
   /// [timeout]: milliseconds to wait after closing the socket
-  Future<ConnectionResponse> disconnect({Duration? timeout}) async {
-    if (Platform.isAndroid || Platform.isIOS) {
-      await bluetooth.disconnect();
-      this.printer.connected = false;
+  Future disconnect({Duration? timeout}) async {
+    try {
+      if (Platform.isAndroid)
+        await flutterPrinterChannel.invokeMethod('disconnect');
+      else if (Platform.isIOS) await iosChannel.invokeMethod('disconnect');
+    } catch (e) {
+      return Future.error(e.toString());
     }
-    //  else if (Platform.isIOS) {
-    // await fbdevice.disconnect();
-    // this.isConnected = false;
-    // }
-
     if (timeout != null) {
       await Future.delayed(timeout, () => null);
     }
-    return ConnectionResponse.success;
   }
 }

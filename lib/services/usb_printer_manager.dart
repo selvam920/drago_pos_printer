@@ -30,8 +30,7 @@ class USBPrinterManager extends PrinterManager {
   }
 
   @override
-  Future<ConnectionResponse> connect(
-      {Duration? timeout = const Duration(seconds: 5)}) async {
+  Future connect({Duration? timeout = const Duration(seconds: 5)}) async {
     if (Platform.isWindows) {
       try {
         docInfo = calloc<DOC_INFO_1>()
@@ -42,31 +41,20 @@ class USBPrinterManager extends PrinterManager {
 
         final phPrinter = calloc<HANDLE>();
         if (OpenPrinter(szPrinterName, phPrinter, nullptr) == FALSE) {
-          this.printer.connected = false;
           return Future<ConnectionResponse>.value(
               ConnectionResponse.printerNotConnected);
         } else {
           this.hPrinter = phPrinter.value;
-
-          this.printer.connected = true;
-          return Future<ConnectionResponse>.value(ConnectionResponse.success);
         }
       } catch (e) {
-        this.printer.connected = false;
-        return Future<ConnectionResponse>.value(ConnectionResponse.timeout);
+        return Future.error(e.toString());
       }
     } else if (Platform.isAndroid) {
       var usbDevice =
           await usbPrinter.connect(printer.vendorId!, printer.productId!);
-      if (usbDevice != null) {
-        this.printer.connected = true;
-        return Future<ConnectionResponse>.value(ConnectionResponse.success);
-      } else {
-        this.printer.connected = false;
-        return Future<ConnectionResponse>.value(ConnectionResponse.timeout);
+      if (usbDevice == null) {
+        return Future.error('Usb device is empty');
       }
-    } else {
-      return Future<ConnectionResponse>.value(ConnectionResponse.timeout);
     }
   }
 
@@ -77,7 +65,7 @@ class USBPrinterManager extends PrinterManager {
   }
 
   @override
-  Future<ConnectionResponse> disconnect({Duration? timeout}) async {
+  Future disconnect({Duration? timeout}) async {
     if (Platform.isWindows) {
       // Tidy up the printer handle.
       ClosePrinter(hPrinter);
@@ -88,25 +76,20 @@ class USBPrinterManager extends PrinterManager {
       free(docInfo!);
       free(szPrinterName);
 
-      this.printer.connected = false;
       if (timeout != null) {
         await Future.delayed(timeout, () => null);
       }
       return ConnectionResponse.success;
     } else if (Platform.isAndroid) {
       await usbPrinter.close();
-      this.printer.connected = false;
       if (timeout != null) {
         await Future.delayed(timeout, () => null);
       }
-      return ConnectionResponse.success;
     }
-    return ConnectionResponse.timeout;
   }
 
   @override
-  Future<ConnectionResponse> writeBytes(List<int> data,
-      {int? vendorId, int? productId}) async {
+  Future writeBytes(List<int> data, {int? vendorId, int? productId}) async {
     if (Platform.isWindows) {
       try {
         await connect();
@@ -157,8 +140,9 @@ class USBPrinterManager extends PrinterManager {
         return ConnectionResponse.unknown;
       }
     } else if (Platform.isAndroid) {
-      var res = await connect();
-      if (res == ConnectionResponse.success) {
+      try {
+        await connect();
+
         var bytes = Uint8List.fromList(data);
         int max = 16384;
 
@@ -168,18 +152,10 @@ class USBPrinterManager extends PrinterManager {
           await usbPrinter.write(Uint8List.fromList(data));
         }
 
-        try {
-          await usbPrinter.close();
-          this.printer.connected = false;
-        } catch (e) {
-          return ConnectionResponse.unknown;
-        }
-
-        return ConnectionResponse.success;
-      } else {
-        return res;
+        await usbPrinter.close();
+      } catch (e) {
+        return Future.error(e.toString());
       }
     }
-    return ConnectionResponse.unsupport;
   }
 }

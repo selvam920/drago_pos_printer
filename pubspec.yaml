@@ -1,6 +1,6 @@
 name: drago_pos_printer
 description: flutter package for print or list down both wireless and bluetooth esc printer devices.
-version: 1.0.3
+version: 1.0.4
 homepage: https://github.com/selvam920/drago_pos_printer
 
 environment:
@@ -16,7 +16,6 @@ dependencies:
   hex: ^0.2.0
   image: ^4.1.7
   connectivity_plus: ^6.0.5 
-  drago_blue_printer: ^0.0.6
   drago_usb_printer: ^0.1.0
   network_info_plus: ^6.0.0
   printing: ^5.12.0

@@ -8,7 +8,6 @@ import 'package:drago_pos_printer/drago_pos_printer.dart';
 import 'package:webcontent_converter/webcontent_converter.dart';
 import 'demo.dart';
 import 'service.dart';
-import 'package:open_filex/open_filex.dart';
 
 class USBPrinterScreen extends StatefulWidget {
   @override
@@ -18,8 +17,6 @@ class USBPrinterScreen extends StatefulWidget {
 class _USBPrinterScreenState extends State<USBPrinterScreen> {
   bool _isLoading = false;
   List<USBPrinter> _printers = [];
-  USBPrinterManager? _manager;
-  List<int> _data = [];
 
   int paperWidth = 0;
   int charPerLine = 0;
@@ -149,17 +146,23 @@ class _USBPrinterScreenState extends State<USBPrinterScreen> {
       _isLoading = true;
       _printers = [];
     });
-    var printers = await USBPrinterManager.discover();
-    setState(() {
-      _isLoading = false;
-      _printers = printers;
+    USBPrinterManager.discover().then((val) {
+      setState(() {
+        _isLoading = false;
+        _printers = val;
+      });
+    }).catchError((err) {
+      var snackBar = SnackBar(
+        content: Text(err.toString()),
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
     });
   }
 
   _startPrinter(int byteType, USBPrinter printer) async {
     var profile = await CapabilityProfile.load();
     var manager = USBPrinterManager(printer);
-    _manager = manager;
+    await manager.connect();
 
     final content = Demo.getShortReceiptContent();
     var bytes = byteType == 1
@@ -177,7 +180,7 @@ class _USBPrinterScreenState extends State<USBPrinterScreen> {
                 executablePath: WebViewHelper.executablePath(),
               ))
                 .toList();
-    List<int> data;
+    List<int> data = [];
     if (byteType == 3) {
       var service = ESCPrinterService(Uint8List.fromList(bytes));
       data = await service.getBytes(
@@ -192,9 +195,13 @@ class _USBPrinterScreenState extends State<USBPrinterScreen> {
       }
     } else
       data = bytes;
-    if (mounted) setState(() => _data = data);
 
-    _manager!.writeBytes(_data);
+    manager.writeBytes(data).catchError((err) {
+      var snackBar = SnackBar(
+        content: Text(err.toString()),
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    });
   }
 
   _tsplPrint(USBPrinter printer) async {
@@ -210,7 +217,7 @@ class _USBPrinterScreenState extends State<USBPrinterScreen> {
       var path = dir.path + "\\receipt.png";
       File file = File(path);
       await file.writeAsBytes(img.encodePng(image));
-      OpenFilex.open(path);
+      // OpenFilex.open(path);
       // for (int i = 1; i <= 1; i++) {
       //   var manager = USBPrinterManager(printer);
       //   TsplGenerator generator = TsplGenerator();

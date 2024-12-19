@@ -34,3 +34,6 @@
 
 ## 1.0.3
 * Issue fix
+
+## 1.0.4
+* Fixes Bluetooth

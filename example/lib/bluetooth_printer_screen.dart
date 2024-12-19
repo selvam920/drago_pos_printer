@@ -13,7 +13,6 @@ class BluetoothPrinterScreen extends StatefulWidget {
 class _BluetoothPrinterScreenState extends State<BluetoothPrinterScreen> {
   bool _isLoading = false;
   List<BluetoothPrinter> _printers = [];
-  BluetoothPrinterManager? _manager;
 
   int paperWidth = 0;
   int charPerLine = 0;
@@ -22,7 +21,6 @@ class _BluetoothPrinterScreenState extends State<BluetoothPrinterScreen> {
   bool showCustom = false;
   @override
   void initState() {
-    _scan();
     paperWidth = PaperSizeWidth.mm80;
     charPerLine = PaperSizeMaxPerLine.mm80;
 
@@ -32,6 +30,7 @@ class _BluetoothPrinterScreenState extends State<BluetoothPrinterScreen> {
     paperTypes.add('Custom');
 
     super.initState();
+    _scan();
   }
 
   @override
@@ -106,22 +105,18 @@ class _BluetoothPrinterScreenState extends State<BluetoothPrinterScreen> {
                     title: Text("${printer.name}"),
                     subtitle: Text("${printer.address}"),
                     leading: Icon(Icons.bluetooth),
-                    onTap: () => _connect(printer),
-                    trailing: printer.connected
-                        ? Wrap(
-                            children: [
-                              IconButton(
-                                  tooltip: 'ESC POS Command',
-                                  onPressed: () => _startPrinter(1, printer),
-                                  icon: Icon(Icons.print)),
-                              IconButton(
-                                  tooltip: 'Html Print',
-                                  onPressed: () => _startPrinter(3, printer),
-                                  icon: Icon(Icons.image)),
-                            ],
-                          )
-                        : null,
-                    selected: printer.connected,
+                    trailing: Wrap(
+                      children: [
+                        IconButton(
+                            tooltip: 'ESC POS Command',
+                            onPressed: () => _print(1, printer),
+                            icon: Icon(Icons.print)),
+                        IconButton(
+                            tooltip: 'Html Print',
+                            onPressed: () => _print(3, printer),
+                            icon: Icon(Icons.image)),
+                      ],
+                    ),
                   ))
               .toList(),
         ],
@@ -139,28 +134,24 @@ class _BluetoothPrinterScreenState extends State<BluetoothPrinterScreen> {
       _isLoading = true;
       _printers = [];
     });
-    var printers = await BluetoothPrinterManager.discover();
-    print(printers);
-    setState(() {
-      _isLoading = false;
-      _printers = printers;
+    BluetoothPrinterManager.discover().then((val) {
+      print(val);
+      setState(() {
+        _isLoading = false;
+        _printers = val;
+      });
+    }).catchError((err) {
+      var snackBar = SnackBar(
+        content: Text(err.toString()),
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
     });
   }
 
-  Future _connect(BluetoothPrinter printer) async {
-    var manager = BluetoothPrinterManager(printer);
-    // await manager.connect();
-    print(" -==== connected =====- ");
-    setState(() {
-      _manager = manager;
-      printer.connected = true;
-    });
-  }
-
-  _startPrinter(int byteType, BluetoothPrinter printer) async {
+  _print(int byteType, BluetoothPrinter printer) async {
     var profile = await CapabilityProfile.load();
-    await _connect(printer);
-
+    var manager = BluetoothPrinterManager(printer);
+    await manager.connect();
     late List<int> data;
     if (byteType == 1) {
       data = await ESCPrinterService(null).getSamplePosBytes(
@@ -187,9 +178,13 @@ class _BluetoothPrinterScreenState extends State<BluetoothPrinterScreen> {
           profile: profile);
     }
 
-    if (_manager != null) {
-      if (!await _manager!.checkConnected()) await _manager!.connect();
-      _manager!.writeBytes(data, isDisconnect: true);
-    }
+    manager.writeBytes(data).then((val) {}).catchError((err) {
+      var snackBar = SnackBar(
+        content: Text(err.toString()),
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    }).whenComplete(() {
+      //manager.disconnect();
+    });
   }
 }
