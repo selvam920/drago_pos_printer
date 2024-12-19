@@ -41,8 +41,7 @@ class USBPrinterManager extends PrinterManager {
 
         final phPrinter = calloc<HANDLE>();
         if (OpenPrinter(szPrinterName, phPrinter, nullptr) == FALSE) {
-          return Future<ConnectionResponse>.value(
-              ConnectionResponse.printerNotConnected);
+          return true;
         } else {
           this.hPrinter = phPrinter.value;
         }
@@ -79,7 +78,7 @@ class USBPrinterManager extends PrinterManager {
       if (timeout != null) {
         await Future.delayed(timeout, () => null);
       }
-      return ConnectionResponse.success;
+      return true;
     } else if (Platform.isAndroid) {
       await usbPrinter.close();
       if (timeout != null) {
@@ -91,54 +90,45 @@ class USBPrinterManager extends PrinterManager {
   @override
   Future writeBytes(List<int> data, {int? vendorId, int? productId}) async {
     if (Platform.isWindows) {
-      try {
-        await connect();
+      await connect();
 
-        // Inform the spooler the document is beginning.
-        final dwJob = StartDocPrinter(hPrinter, 1, docInfo!);
-        if (dwJob == 0) {
-          ClosePrinter(hPrinter);
-          return ConnectionResponse.printInProgress;
-        }
-        // Start a page.
-        if (StartPagePrinter(hPrinter) == 0) {
-          EndDocPrinter(hPrinter);
-          ClosePrinter(hPrinter);
-          return ConnectionResponse.printerNotSelected;
-        }
-
-        // Send the data to the printer.
-        final lpData = data.toUint8();
-        dwCount = data.length;
-        if (WritePrinter(hPrinter, lpData, dwCount!, dwBytesWritten!) == 0) {
-          EndPagePrinter(hPrinter);
-          EndDocPrinter(hPrinter);
-          ClosePrinter(hPrinter);
-          return ConnectionResponse.printerNotWritable;
-        }
-
-        // End the page.
-        if (EndPagePrinter(hPrinter) == 0) {
-          EndDocPrinter(hPrinter);
-          ClosePrinter(hPrinter);
-        }
-
-        // Inform the spooler that the document is ending.
-        if (EndDocPrinter(hPrinter) == 0) {
-          ClosePrinter(hPrinter);
-        }
-
-        // Check to see if correct number of bytes were written.
-        if (dwBytesWritten!.value != dwCount) {}
-
-        // Tidy up the printer handle.
+      // Inform the spooler the document is beginning.
+      final dwJob = StartDocPrinter(hPrinter, 1, docInfo!);
+      if (dwJob == 0) {
         ClosePrinter(hPrinter);
-        // await disconnect();
-
-        return ConnectionResponse.success;
-      } catch (e) {
-        return ConnectionResponse.unknown;
       }
+      // Start a page.
+      if (StartPagePrinter(hPrinter) == 0) {
+        EndDocPrinter(hPrinter);
+        ClosePrinter(hPrinter);
+      }
+
+      // Send the data to the printer.
+      final lpData = data.toUint8();
+      dwCount = data.length;
+      if (WritePrinter(hPrinter, lpData, dwCount!, dwBytesWritten!) == 0) {
+        EndPagePrinter(hPrinter);
+        EndDocPrinter(hPrinter);
+        ClosePrinter(hPrinter);
+      }
+
+      // End the page.
+      if (EndPagePrinter(hPrinter) == 0) {
+        EndDocPrinter(hPrinter);
+        ClosePrinter(hPrinter);
+      }
+
+      // Inform the spooler that the document is ending.
+      if (EndDocPrinter(hPrinter) == 0) {
+        ClosePrinter(hPrinter);
+      }
+
+      // Check to see if correct number of bytes were written.
+      if (dwBytesWritten!.value != dwCount) {}
+
+      // Tidy up the printer handle.
+      ClosePrinter(hPrinter);
+      // await disconnect();
     } else if (Platform.isAndroid) {
       try {
         await connect();

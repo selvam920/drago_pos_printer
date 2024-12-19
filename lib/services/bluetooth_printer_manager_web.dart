@@ -4,8 +4,7 @@ import 'package:drago_pos_printer/drago_pos_printer.dart';
 class BluetoothPrinterManager {
   BluetoothPrinterManager(POSPrinter printer);
 
-  Future<ConnectionResponse> connect(
-      {Duration? timeout = const Duration(seconds: 5)}) {
+  Future connect({Duration? timeout = const Duration(seconds: 5)}) {
     throw Exception('Platform does not support');
   }
 
@@ -13,11 +12,11 @@ class BluetoothPrinterManager {
     throw Exception('Platform does not support');
   }
 
-  Future<ConnectionResponse> disconnect({Duration? timeout}) {
+  Future disconnect({Duration? timeout}) {
     throw Exception('Platform does not support');
   }
 
-  Future<ConnectionResponse> writeBytes(List<int> data) {
+  Future writeBytes(List<int> data) {
     throw Exception('Platform does not support');
   }
 }
