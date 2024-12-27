@@ -3,10 +3,8 @@
     package="com.example.example">
     <uses-feature android:name="android.hardware.bluetooth" android:required="false"/>
     <uses-feature android:name="android.hardware.bluetooth_le" android:required="false"/>
-    <uses-permission android:name="android.permission.BLUETOOTH"
-         />
-    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"
-         />
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
          <!-- Needed only if your app makes the device discoverable to Bluetooth
          devices. -->
     <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" />
@@ -20,7 +18,7 @@
         tools:replace="android:required"/>
 
    <application
-        android:label="example"
+        android:label="Drago Pos Printer"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

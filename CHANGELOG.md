@@ -37,3 +37,6 @@
 
 ## 1.0.4
 * Fixes Bluetooth
+
+## 1.0.5
+* Update gradle version to 8.9.2
