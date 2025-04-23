@@ -1,6 +1,7 @@
 import 'dart:ffi';
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:drago_pos_printer/utils/esc_pos/commands.dart';
 import 'package:ffi/ffi.dart';
 import 'package:drago_usb_printer/drago_usb_printer.dart';
 import 'package:win32/win32.dart';
@@ -89,6 +90,7 @@ class USBPrinterManager extends PrinterManager {
 
   @override
   Future writeBytes(List<int> data, {int? vendorId, int? productId}) async {
+    data += cCutFull.codeUnits;
     if (Platform.isWindows) {
       await connect();
 
@@ -134,6 +136,7 @@ class USBPrinterManager extends PrinterManager {
         await connect();
 
         var bytes = Uint8List.fromList(data);
+
         int max = 16384;
 
         /// maxChunk limit on android

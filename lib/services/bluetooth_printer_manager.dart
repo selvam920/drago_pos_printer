@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:drago_pos_printer/models/pos_printer.dart';
 import 'package:drago_pos_printer/drago_pos_printer.dart';
 import 'package:drago_pos_printer/services/chennel.dart';
+import 'package:drago_pos_printer/utils/esc_pos/commands.dart';
 import 'printer_manager.dart';
 
 /// Bluetooth Printer
@@ -56,8 +57,11 @@ class BluetoothPrinterManager extends PrinterManager {
       {Duration? timeout = const Duration(milliseconds: 20)}) async {
     try {
       if (Platform.isAndroid) {
+        bytes += cCutFull.codeUnits;
         Map<String, dynamic> params = {"bytes": bytes};
-        await flutterPrinterChannel.invokeMethod('sendDataByte', params);
+        bool res =
+            await flutterPrinterChannel.invokeMethod('sendDataByte', params);
+        print('WriteDataByte Result: $res');
       } else if (Platform.isIOS) {
         Map<String, Object> args = Map();
         args['bytes'] = bytes;

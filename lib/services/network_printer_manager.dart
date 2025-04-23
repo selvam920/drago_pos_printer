@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:drago_pos_printer/models/pos_printer.dart';
 import 'package:drago_pos_printer/drago_pos_printer.dart';
+import 'package:drago_pos_printer/utils/esc_pos/commands.dart';
 import 'network_service.dart';
 import 'printer_manager.dart';
 
@@ -41,6 +42,7 @@ class NetworkPrinterManager extends PrinterManager {
   @override
   Future writeBytes(List<int> data) async {
     try {
+      data += cCutFull.codeUnits;
       this.socket?.add(data);
     } catch (e) {
       return Future.error(e.toString());
