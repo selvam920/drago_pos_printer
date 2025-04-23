@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:drago_pos_printer/models/pos_printer.dart';
 import 'package:drago_pos_printer/drago_pos_printer.dart';
-import 'package:drago_pos_printer/utils/esc_pos/commands.dart';
 import 'network_service.dart';
 import 'printer_manager.dart';
 
