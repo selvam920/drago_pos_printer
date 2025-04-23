@@ -57,7 +57,6 @@ class BluetoothPrinterManager extends PrinterManager {
       {Duration? timeout = const Duration(milliseconds: 20)}) async {
     try {
       if (Platform.isAndroid) {
-        bytes += cCutFull.codeUnits;
         Map<String, dynamic> params = {"bytes": bytes};
         bool res =
             await flutterPrinterChannel.invokeMethod('sendDataByte', params);

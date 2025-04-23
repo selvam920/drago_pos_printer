@@ -42,7 +42,6 @@ class NetworkPrinterManager extends PrinterManager {
   @override
   Future writeBytes(List<int> data) async {
     try {
-      data += cCutFull.codeUnits;
       this.socket?.add(data);
     } catch (e) {
       return Future.error(e.toString());

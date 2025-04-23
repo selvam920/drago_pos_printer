@@ -90,7 +90,6 @@ class USBPrinterManager extends PrinterManager {
 
   @override
   Future writeBytes(List<int> data, {int? vendorId, int? productId}) async {
-    data += cCutFull.codeUnits;
     if (Platform.isWindows) {
       await connect();
 

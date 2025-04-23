@@ -43,3 +43,6 @@
 
 ## 1.0.6
 * Update dependancies
+
+## 1.0.7
+* Removed auto cut
