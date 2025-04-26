@@ -3,6 +3,7 @@ package com.example.drago_pos_printer.bluetooth
 import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothClass
 import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanResult
 import android.content.Context
@@ -43,30 +44,22 @@ class BluetoothService(private var bluetoothHandler: Handler?) {
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // Scan bluetooth
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    fun scanBluDevice() : ArrayList<HashMap<String, String?>> {
+    fun scanBluDevice() : List<Map<String, String>> {
         val list = ArrayList<HashMap<String, String?>>()
         bluetoothHandler?.obtainMessage(BluetoothConstants.MESSAGE_START_SCANNING, -1, -1)
             ?.sendToTarget()
         val pairedDevices: Set<BluetoothDevice>? = mBluetoothAdapter.bondedDevices
-        pairedDevices?.forEach { device ->
-            val deviceName =
-                if (device.name == null) device.address else device.name
-            val deviceHardwareAddress = device.address // MAC address
-            val deviceMap: HashMap<String, String?> = HashMap()
-            deviceMap["name"] = deviceName
-            deviceMap["address"] = deviceHardwareAddress
-            list.add(deviceMap)
-            Log.d(TAG, "deviceName $deviceName deviceHardwareAddress $deviceHardwareAddress")
 
-            //mChannel.invokeMethod("ScanResult", deviceMap)
-
-//            currentActivity?.runOnUiThread { channel.invokeMethod("ScanResult", deviceMap) }
-//            devicesSink?.success(deviceMap)
-        }
-
-        bluetoothHandler?.obtainMessage(BluetoothConstants.MESSAGE_STOP_SCANNING, -1, -1)
-            ?.sendToTarget()
-        return list;
+        return pairedDevices?.filter { device ->
+                val bluetoothClass = device.bluetoothClass
+            // Filter for devices with major class IMAGING (includes printers)
+            bluetoothClass != null && bluetoothClass.majorDeviceClass == BluetoothClass.Device.Major.IMAGING
+        }?.map { device ->
+            mapOf(
+                "name" to (device.name ?: "Unknown"),
+                "address" to device.address
+            )
+        } ?: emptyList()
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////

@@ -46,3 +46,6 @@
 
 ## 1.0.7
 * Removed auto cut
+
+## 1.0.8
+* Improved bluetooth list only show printers

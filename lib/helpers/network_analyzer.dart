@@ -21,41 +21,6 @@ class NetworkAddress {
 class NetworkAnalyzer {
   /// Pings a given [subnet] (xxx.xxx.xxx) on a given [port].
   ///
-  /// Pings IP:PORT one by one
-  static Stream<NetworkAddress> discover(
-    String subnet,
-    int port, {
-    Duration timeout = const Duration(milliseconds: 400),
-  }) async* {
-    if (port < 1 || port > 65535) {
-      throw 'Incorrect port';
-    }
-
-    for (int i = 1; i < 256; ++i) {
-      final host = '$subnet.$i';
-
-      try {
-        final Socket s = await Socket.connect(host, port, timeout: timeout);
-        s.destroy();
-        yield NetworkAddress(host, true);
-      } catch (e) {
-        if (!(e is SocketException)) {
-          rethrow;
-        }
-
-        // Check if connection timed out or we got one of predefined errors
-        if (e.osError == null || _errorCodes.contains(e.osError?.errorCode)) {
-          yield NetworkAddress(host, false);
-        } else {
-          // Error 23,24: Too many open files in system
-          rethrow;
-        }
-      }
-    }
-  }
-
-  /// Pings a given [subnet] (xxx.xxx.xxx) on a given [port].
-  ///
   /// Pings IP:PORT all at once
   static Stream<NetworkAddress> discover2(
     String subnet,
@@ -76,8 +41,8 @@ class NetworkAnalyzer {
         socket.destroy();
         out.sink.add(NetworkAddress(host, true));
       }).catchError((dynamic e) {
-        if (!(e is SocketException)) {
-          throw e;
+        if (e is! SocketException) {
+          return;
         }
 
         // Check if connection timed out or we got one of predefined errors
@@ -85,7 +50,7 @@ class NetworkAnalyzer {
           out.sink.add(NetworkAddress(host, false));
         } else {
           // Error 23,24: Too many open files in system
-          throw e;
+          return;
         }
       });
     }
