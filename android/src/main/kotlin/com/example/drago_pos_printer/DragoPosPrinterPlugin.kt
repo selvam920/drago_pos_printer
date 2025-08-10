@@ -154,7 +154,9 @@ class DragoPosPrinterPlugin : FlutterPlugin, MethodCallHandler, PluginRegistry.R
         messageChannel = null
         messageUSBChannel = null
 
-        bluetoothService.setHandler(null)
+        if (this::bluetoothService.isInitialized) {
+            bluetoothService.setHandler(null)
+        }
     }
 
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {

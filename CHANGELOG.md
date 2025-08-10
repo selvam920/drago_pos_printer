@@ -49,3 +49,6 @@
 
 ## 1.0.8
 * Improved bluetooth list only show printers
+
+## 1.0.9
+* Fixed bluetooth initialization issue
