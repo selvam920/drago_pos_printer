@@ -52,3 +52,6 @@
 
 ## 1.0.9
 * Fixed bluetooth initialization issue
+
+## 1.1.0
+* Fixed usb initialization issue

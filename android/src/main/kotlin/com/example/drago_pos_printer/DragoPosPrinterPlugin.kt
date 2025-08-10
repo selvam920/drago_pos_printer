@@ -165,16 +165,19 @@ class DragoPosPrinterPlugin : FlutterPlugin, MethodCallHandler, PluginRegistry.R
         context = binding.activity.applicationContext
         currentActivity = binding.activity
 
+        if (binaryMessenger == null) {
+            Log.e(TAG, "binaryMessenger is not initialized. Did you forget to call onAttachedToEngine?")
+            return
+        }
+
         channel = MethodChannel(binaryMessenger!!, methodChannel)
         channel!!.setMethodCallHandler(this)
 
         messageChannel = EventChannel(binaryMessenger!!, eventChannelBT)
         messageChannel?.setStreamHandler(object : EventChannel.StreamHandler {
-
             override fun onListen(p0: Any?, sink: EventChannel.EventSink) {
                 eventSink = sink
             }
-
             override fun onCancel(p0: Any?) {
                 eventSink = null
             }
@@ -182,11 +185,9 @@ class DragoPosPrinterPlugin : FlutterPlugin, MethodCallHandler, PluginRegistry.R
 
         messageUSBChannel = EventChannel(binaryMessenger!!, eventChannelUSB)
         messageUSBChannel?.setStreamHandler(object : EventChannel.StreamHandler {
-
             override fun onListen(p0: Any?, sink: EventChannel.EventSink) {
                 eventUSBSink = sink
             }
-
             override fun onCancel(p0: Any?) {
                 eventUSBSink = null
             }
