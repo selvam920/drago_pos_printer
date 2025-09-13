@@ -55,3 +55,6 @@
 
 ## 1.1.0
 * Fixed usb initialization issue
+
+## 1.1.1
+* Update package version
