@@ -1,0 +1,202 @@
+> Task :gradle:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :gradle:compileKotlin UP-TO-DATE
+> Task :gradle:compileJava NO-SOURCE
+> Task :gradle:compileGroovy NO-SOURCE
+> Task :gradle:pluginDescriptors UP-TO-DATE
+> Task :gradle:processResources UP-TO-DATE
+> Task :gradle:classes UP-TO-DATE
+> Task :gradle:jar UP-TO-DATE
+WARNING: We recommend using a newer Android Gradle plugin to use compileSdk = 36
+
+This Android Gradle plugin (8.7.0) was tested up to compileSdk = 35.
+
+You are strongly encouraged to update your project to use a newer
+Android Gradle plugin that has been tested with compileSdk = 36.
+
+If you are already using the latest version of the Android Gradle plugin,
+you may need to wait until a newer version with support for compileSdk = 36 is available.
+
+For more information refer to the compatibility table:
+https://d.android.com/r/tools/api-level-support
+
+To suppress this warning, add/update
+    android.suppressUnsupportedCompileSdk=36
+to this project's gradle.properties.
+> Task :app:DebugMinSdkCheck
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :app:compileFlutterBuildDebug UP-TO-DATE
+> Task :app:packJniLibsflutterBuildDebug UP-TO-DATE
+> Task :charset_converter:preBuild UP-TO-DATE
+> Task :charset_converter:preDebugBuild UP-TO-DATE
+> Task :charset_converter:writeDebugAarMetadata UP-TO-DATE
+> Task :connectivity_plus:preBuild UP-TO-DATE
+> Task :connectivity_plus:preDebugBuild UP-TO-DATE
+> Task :connectivity_plus:writeDebugAarMetadata UP-TO-DATE
+> Task :drago_blue_printer:preBuild UP-TO-DATE
+> Task :drago_blue_printer:preDebugBuild UP-TO-DATE
+> Task :drago_blue_printer:writeDebugAarMetadata UP-TO-DATE
+> Task :drago_pos_printer:preBuild UP-TO-DATE
+> Task :drago_pos_printer:preDebugBuild UP-TO-DATE
+> Task :drago_pos_printer:writeDebugAarMetadata UP-TO-DATE
+> Task :drago_usb_printer:preBuild UP-TO-DATE
+> Task :drago_usb_printer:preDebugBuild UP-TO-DATE
+> Task :drago_usb_printer:writeDebugAarMetadata UP-TO-DATE
+> Task :network_info_plus:preBuild UP-TO-DATE
+> Task :network_info_plus:preDebugBuild UP-TO-DATE
+> Task :network_info_plus:writeDebugAarMetadata UP-TO-DATE
+> Task :path_provider_android:preBuild UP-TO-DATE
+> Task :path_provider_android:preDebugBuild UP-TO-DATE
+> Task :path_provider_android:writeDebugAarMetadata UP-TO-DATE
+> Task :permission_handler_android:preBuild UP-TO-DATE
+> Task :permission_handler_android:preDebugBuild UP-TO-DATE
+> Task :permission_handler_android:writeDebugAarMetadata UP-TO-DATE
+> Task :printing:preBuild UP-TO-DATE
+> Task :printing:preDebugBuild UP-TO-DATE
+> Task :printing:writeDebugAarMetadata UP-TO-DATE
+> Task :webcontent_converter:preBuild UP-TO-DATE
+> Task :webcontent_converter:preDebugBuild UP-TO-DATE
+> Task :webcontent_converter:writeDebugAarMetadata UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :app:cleanMergeDebugAssets
+> Task :app:mergeDebugShaders UP-TO-DATE
+> Task :app:compileDebugShaders NO-SOURCE
+> Task :app:generateDebugAssets UP-TO-DATE
+> Task :charset_converter:mergeDebugShaders UP-TO-DATE
+> Task :charset_converter:compileDebugShaders NO-SOURCE
+> Task :charset_converter:generateDebugAssets UP-TO-DATE
+> Task :charset_converter:packageDebugAssets UP-TO-DATE
+> Task :connectivity_plus:mergeDebugShaders UP-TO-DATE
+> Task :connectivity_plus:compileDebugShaders NO-SOURCE
+> Task :connectivity_plus:generateDebugAssets UP-TO-DATE
+> Task :connectivity_plus:packageDebugAssets UP-TO-DATE
+> Task :drago_blue_printer:mergeDebugShaders UP-TO-DATE
+> Task :drago_blue_printer:compileDebugShaders NO-SOURCE
+> Task :drago_blue_printer:generateDebugAssets UP-TO-DATE
+> Task :drago_blue_printer:packageDebugAssets UP-TO-DATE
+> Task :drago_pos_printer:mergeDebugShaders UP-TO-DATE
+> Task :drago_pos_printer:compileDebugShaders NO-SOURCE
+> Task :drago_pos_printer:generateDebugAssets UP-TO-DATE
+> Task :drago_pos_printer:packageDebugAssets UP-TO-DATE
+> Task :drago_usb_printer:mergeDebugShaders UP-TO-DATE
+> Task :drago_usb_printer:compileDebugShaders NO-SOURCE
+> Task :drago_usb_printer:generateDebugAssets UP-TO-DATE
+> Task :drago_usb_printer:packageDebugAssets UP-TO-DATE
+> Task :network_info_plus:mergeDebugShaders UP-TO-DATE
+> Task :network_info_plus:compileDebugShaders NO-SOURCE
+> Task :network_info_plus:generateDebugAssets UP-TO-DATE
+> Task :network_info_plus:packageDebugAssets UP-TO-DATE
+> Task :path_provider_android:mergeDebugShaders UP-TO-DATE
+> Task :path_provider_android:compileDebugShaders NO-SOURCE
+> Task :path_provider_android:generateDebugAssets UP-TO-DATE
+> Task :path_provider_android:packageDebugAssets UP-TO-DATE
+> Task :permission_handler_android:mergeDebugShaders UP-TO-DATE
+> Task :permission_handler_android:compileDebugShaders NO-SOURCE
+> Task :permission_handler_android:generateDebugAssets UP-TO-DATE
+> Task :permission_handler_android:packageDebugAssets UP-TO-DATE
+> Task :printing:mergeDebugShaders UP-TO-DATE
+> Task :printing:compileDebugShaders NO-SOURCE
+> Task :printing:generateDebugAssets UP-TO-DATE
+> Task :printing:packageDebugAssets UP-TO-DATE
+> Task :webcontent_converter:mergeDebugShaders UP-TO-DATE
+> Task :webcontent_converter:compileDebugShaders NO-SOURCE
+> Task :webcontent_converter:generateDebugAssets UP-TO-DATE
+> Task :webcontent_converter:packageDebugAssets UP-TO-DATE
+> Task :app:mergeDebugAssets
+> Task :app:copyFlutterAssetsDebug
+> Task :app:generateDebugResValues UP-TO-DATE
+> Task :charset_converter:generateDebugResValues UP-TO-DATE
+> Task :charset_converter:generateDebugResources UP-TO-DATE
+> Task :charset_converter:packageDebugResources UP-TO-DATE
+> Task :connectivity_plus:generateDebugResValues UP-TO-DATE
+> Task :connectivity_plus:generateDebugResources UP-TO-DATE
+> Task :connectivity_plus:packageDebugResources UP-TO-DATE
+> Task :drago_blue_printer:generateDebugResValues UP-TO-DATE
+> Task :drago_blue_printer:generateDebugResources UP-TO-DATE
+> Task :drago_blue_printer:packageDebugResources UP-TO-DATE
+> Task :drago_pos_printer:generateDebugResValues UP-TO-DATE
+> Task :drago_pos_printer:generateDebugResources UP-TO-DATE
+> Task :drago_pos_printer:packageDebugResources UP-TO-DATE
+> Task :drago_usb_printer:generateDebugResValues UP-TO-DATE
+> Task :drago_usb_printer:generateDebugResources UP-TO-DATE
+> Task :drago_usb_printer:packageDebugResources UP-TO-DATE
+> Task :network_info_plus:generateDebugResValues UP-TO-DATE
+> Task :network_info_plus:generateDebugResources UP-TO-DATE
+> Task :network_info_plus:packageDebugResources UP-TO-DATE
+> Task :path_provider_android:generateDebugResValues UP-TO-DATE
+> Task :path_provider_android:generateDebugResources UP-TO-DATE
+> Task :path_provider_android:packageDebugResources UP-TO-DATE
+> Task :permission_handler_android:generateDebugResValues UP-TO-DATE
+> Task :permission_handler_android:generateDebugResources UP-TO-DATE
+> Task :permission_handler_android:packageDebugResources UP-TO-DATE
+> Task :printing:generateDebugResValues UP-TO-DATE
+> Task :printing:generateDebugResources UP-TO-DATE
+> Task :printing:packageDebugResources UP-TO-DATE
+> Task :webcontent_converter:generateDebugResValues UP-TO-DATE
+> Task :webcontent_converter:generateDebugResources UP-TO-DATE
+> Task :webcontent_converter:packageDebugResources UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :charset_converter:extractDeepLinksDebug UP-TO-DATE
+> Task :charset_converter:processDebugManifest UP-TO-DATE
+> Task :connectivity_plus:extractDeepLinksDebug UP-TO-DATE
+> Task :connectivity_plus:processDebugManifest UP-TO-DATE
+> Task :drago_blue_printer:extractDeepLinksDebug UP-TO-DATE
+> Task :drago_blue_printer:processDebugManifest UP-TO-DATE
+> Task :drago_pos_printer:extractDeepLinksDebug UP-TO-DATE
+> Task :drago_pos_printer:processDebugManifest UP-TO-DATE
+> Task :drago_usb_printer:extractDeepLinksDebug UP-TO-DATE
+> Task :drago_usb_printer:processDebugManifest UP-TO-DATE
+> Task :network_info_plus:extractDeepLinksDebug UP-TO-DATE
+> Task :network_info_plus:processDebugManifest UP-TO-DATE
+> Task :path_provider_android:extractDeepLinksDebug UP-TO-DATE
+> Task :path_provider_android:processDebugManifest UP-TO-DATE
+> Task :permission_handler_android:extractDeepLinksDebug UP-TO-DATE
+> Task :permission_handler_android:processDebugManifest UP-TO-DATE
+> Task :printing:extractDeepLinksDebug UP-TO-DATE
+> Task :printing:processDebugManifest UP-TO-DATE
+> Task :webcontent_converter:extractDeepLinksDebug UP-TO-DATE
+> Task :webcontent_converter:processDebugManifest UP-TO-DATE
+
+> Task :app:processDebugMainManifest FAILED
+C:\Users\jacks\Documents\GitHub\drago_pos_printer\example\android\app\src\main\AndroidManifest.xml Warning:
+	Namespace 'com.example.drago_pos_printer' is used in multiple modules and/or libraries: AndroidManifest.xml, :drago_pos_printer. Please ensure that all modules and libraries have a unique namespace. For more information, See https://developer.android.com/studio/build/configure-app-module#set-namespace
+
+C:\Users\jacks\Documents\GitHub\drago_pos_printer\example\android\app\src\debug\AndroidManifest.xml Error:
+See https://developer.android.com/r/studio-ui/build/manifest-merger for more information about the manifest merger.
+
+	Overlay manifest:package attribute declared at AndroidManifest.xml:2:5-34 value=(com.example.example)
+	does not match the module's namespace (com.example.drago_pos_printer).
+	Suggestion: remove the package="com.example.example" declaration at C:\Users\jacks\Documents\GitHub\drago_pos_printer\example\android\app\src\debug\AndroidManifest.xml.
+	If you want to customize the applicationId for a buildType or productFlavor, consider setting applicationIdSuffix or using the Variant API.
+	For more information, see https://developer.android.com/studio/build/build-variants
+
+
+[Incubating] Problems report is available at: file:///C:/Users/jacks/Documents/GitHub/drago_pos_printer/example/build/reports/problems/problems-report.html
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:processDebugMainManifest'.
+> Manifest merger failed with multiple errors, see logs
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 4s
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+101 actionable tasks: 5 executed, 96 up-to-date

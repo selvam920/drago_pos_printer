@@ -18,125 +18,279 @@ class _USBPrinterScreenState extends State<USBPrinterScreen> {
   bool _isLoading = false;
   List<USBPrinter> _printers = [];
 
-  int paperWidth = 0;
-  int charPerLine = 0;
+  int paperWidth = PaperSizeWidth.mm80;
+  int charPerLine = PaperSizeMaxPerLine.mm80;
+  String _selectedPaperSize = '80mm';
 
-  List<String> paperTypes = [];
+  final TextEditingController _customWidthController = TextEditingController();
+  final TextEditingController _customCharsController = TextEditingController();
   bool showCustom = false;
 
   @override
   void initState() {
-    _scan();
-    paperWidth = PaperSizeWidth.mm80;
-    charPerLine = PaperSizeMaxPerLine.mm80;
-
-    paperTypes.add('58mm');
-    paperTypes.add('80mmOld');
-    paperTypes.add('80mm');
-    paperTypes.add('Custom');
-
     super.initState();
+    _scan();
+  }
+
+  @override
+  void dispose() {
+    _customWidthController.dispose();
+    _customCharsController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[50],
       appBar: AppBar(
-        title: Text("USB Printer Screen"),
-      ),
-      body: ListView(
-        padding: EdgeInsets.all(20),
-        children: [
-          DropdownButtonHideUnderline(
-            child: DropdownButtonFormField(
-              decoration: InputDecoration(labelText: 'Paper Size'),
-              items: paperTypes.map((item) {
-                return DropdownMenuItem(
-                  value: item,
-                  child: Text(item),
-                );
-              }).toList(),
-              onChanged: (String? selected) async {
-                showCustom = false;
-                if (selected != null) {
-                  if (selected == "58mm") {
-                    paperWidth = PaperSizeWidth.mm58;
-                    charPerLine = PaperSizeMaxPerLine.mm58;
-                  } else if (selected == "80mmOld") {
-                    paperWidth = PaperSizeWidth.mm80_Old;
-                    charPerLine = PaperSizeMaxPerLine.mm80_Old;
-                  } else if (selected == "80mm") {
-                    paperWidth = PaperSizeWidth.mm80;
-                    charPerLine = PaperSizeMaxPerLine.mm80;
-                  } else if (selected == "Custom") {
-                    paperWidth = PaperSizeWidth.mm80;
-                    charPerLine = PaperSizeMaxPerLine.mm80;
-                    showCustom = true;
-                  }
-                  setState(() {});
-                }
-              },
+        title: Text(
+          "USB Printers",
+          style: TextStyle(fontWeight: FontWeight.w600, color: Colors.white),
+        ),
+        backgroundColor: Colors.indigo,
+        elevation: 0,
+        actions: [
+          if (_isLoading)
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.only(right: 16.0),
+                child: SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  ),
+                ),
+              ),
             ),
-          ),
-          if (showCustom)
-            Row(
-              children: [
-                Expanded(
-                    child: TextFormField(
-                  initialValue: paperWidth.toString(),
-                  onChanged: (val) {
-                    if (val.isNotEmpty) {
-                      paperWidth = int.parse(val);
-                    } else
-                      paperWidth = 0;
-                  },
-                )),
-                SizedBox(width: 20),
-                Expanded(
-                    child: TextFormField(
-                  initialValue: charPerLine.toString(),
-                  onChanged: (val) {
-                    if (val.isNotEmpty) {
-                      charPerLine = int.parse(val);
-                    } else
-                      charPerLine = 0;
-                  },
-                ))
-              ],
-            ),
-          SizedBox(height: 10),
-          ..._printers
-              .map((printer) => ListTile(
-                    title: Text("${printer.name}"),
-                    subtitle: Text("${printer.address}"),
-                    leading: Icon(Icons.usb),
-                    trailing: Wrap(
-                      children: [
-                        IconButton(
-                            tooltip: 'Tspl Command',
-                            onPressed: () => _tsplPrint(printer),
-                            icon: Icon(Icons.qr_code)),
-                        IconButton(
-                            tooltip: 'ESC POS Command',
-                            onPressed: () => _startPrinter(1, printer),
-                            icon: Icon(Icons.print)),
-                        IconButton(
-                            tooltip: 'Pdf',
-                            onPressed: () => _startPrinter(2, printer),
-                            icon: Icon(Icons.picture_as_pdf)),
-                        IconButton(
-                            tooltip: 'Html Print',
-                            onPressed: () => _startPrinter(3, printer),
-                            icon: Icon(Icons.image)),
-                      ],
-                    ),
-                  ))
-              .toList(),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        child: _isLoading ? Icon(Icons.stop) : Icon(Icons.play_arrow),
+      floatingActionButton: FloatingActionButton.extended(
+        backgroundColor: Colors.indigo,
         onPressed: _isLoading ? null : _scan,
+        icon: Icon(_isLoading ? Icons.hourglass_top : Icons.refresh,
+            color: Colors.white),
+        label: Text(
+          _isLoading ? "Scanning..." : "Refresh",
+          style: TextStyle(color: Colors.white),
+        ),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _buildSettingsCard(),
+            SizedBox(height: 24),
+            Row(
+              children: [
+                Text(
+                  "Connected Printers",
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.indigo[900],
+                  ),
+                ),
+                if (_isLoading) ...[
+                  SizedBox(width: 12),
+                  SizedBox(
+                    height: 14,
+                    width: 14,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                ]
+              ],
+            ),
+            SizedBox(height: 12),
+            if (_printers.isEmpty && !_isLoading)
+              _buildEmptyState("No USB printers found.")
+            else if (_printers.isEmpty && _isLoading)
+              Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Center(child: Text("Checking USB connections...")),
+              ),
+            ..._printers.map((printer) => _buildPrinterCard(printer)).toList(),
+            SizedBox(height: 80),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState(String message) {
+    return Container(
+      padding: EdgeInsets.all(20),
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Text(
+        message,
+        style: TextStyle(color: Colors.grey[600]),
+      ),
+    );
+  }
+
+  Widget _buildSettingsCard() {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Printer Settings",
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.indigo,
+              ),
+            ),
+            SizedBox(height: 16),
+            DropdownButtonHideUnderline(
+              child: InputDecorator(
+                decoration: InputDecoration(
+                  labelText: 'Paper Size',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  contentPadding:
+                      EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                ),
+                child: DropdownButton<String>(
+                  value: _selectedPaperSize,
+                  isDense: true,
+                  items: ['58mm', '80mmOld', '80mm', 'Custom'].map((item) {
+                    return DropdownMenuItem(value: item, child: Text(item));
+                  }).toList(),
+                  onChanged: (String? selected) {
+                    if (selected == null) return;
+                    setState(() {
+                      _selectedPaperSize = selected;
+                      showCustom = selected == 'Custom';
+                      switch (selected) {
+                        case "58mm":
+                          paperWidth = PaperSizeWidth.mm58;
+                          charPerLine = PaperSizeMaxPerLine.mm58;
+                          break;
+                        case "80mmOld":
+                          paperWidth = PaperSizeWidth.mm80_Old;
+                          charPerLine = PaperSizeMaxPerLine.mm80_Old;
+                          break;
+                        case "80mm":
+                          paperWidth = PaperSizeWidth.mm80;
+                          charPerLine = PaperSizeMaxPerLine.mm80;
+                          break;
+                        case "Custom":
+                          // Keep current or set defaults
+                          break;
+                      }
+                      if (showCustom) {
+                        _customWidthController.text = paperWidth.toString();
+                        _customCharsController.text = charPerLine.toString();
+                      }
+                    });
+                  },
+                ),
+              ),
+            ),
+            if (showCustom) ...[
+              SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _customWidthController,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        labelText: 'Width (mm)',
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8)),
+                      ),
+                      onChanged: (val) => paperWidth = int.tryParse(val) ?? 0,
+                    ),
+                  ),
+                  SizedBox(width: 16),
+                  Expanded(
+                    child: TextField(
+                      controller: _customCharsController,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        labelText: 'Chars/Line',
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8)),
+                      ),
+                      onChanged: (val) => charPerLine = int.tryParse(val) ?? 0,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPrinterCard(USBPrinter printer) {
+    return Card(
+      elevation: 2,
+      margin: EdgeInsets.symmetric(vertical: 6),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: ListTile(
+        contentPadding: EdgeInsets.all(16),
+        leading: Container(
+          padding: EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.indigo.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(Icons.usb, color: Colors.indigo),
+        ),
+        title: Text(
+          printer.name ?? "Unknown Device",
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+        ),
+        subtitle: Text(
+          printer.address ?? "",
+          style: TextStyle(color: Colors.grey[600]),
+        ),
+        trailing: Wrap(
+          spacing: 8,
+          children: [
+            IconButton(
+              tooltip: 'TSPL Label',
+              onPressed: () => _tsplPrint(printer),
+              icon: Icon(Icons.qr_code),
+              color: Colors.purple,
+            ),
+            IconButton(
+              tooltip: 'Test Print',
+              onPressed: () => _startPrinter(1, printer),
+              icon: Icon(Icons.receipt_long),
+              color: Colors.blue,
+            ),
+            IconButton(
+              tooltip: 'PDF Print',
+              onPressed: () => _startPrinter(2, printer),
+              icon: Icon(Icons.picture_as_pdf),
+              color: Colors.red,
+            ),
+            IconButton(
+              tooltip: 'HTML Print',
+              onPressed: () => _startPrinter(3, printer),
+              icon: Icon(Icons.html),
+              color: Colors.orange,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -152,88 +306,95 @@ class _USBPrinterScreenState extends State<USBPrinterScreen> {
         _printers = val;
       });
     }).catchError((err) {
+      setState(() {
+        _isLoading = false;
+      });
       var snackBar = SnackBar(
         content: Text(err.toString()),
+        backgroundColor: Colors.red,
       );
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
     });
   }
 
   _startPrinter(int byteType, USBPrinter printer) async {
-    var profile = await CapabilityProfile.load();
-    var manager = USBPrinterManager(printer);
-    await manager.connect();
+    try {
+      var profile = await CapabilityProfile.load();
+      var manager = USBPrinterManager(printer);
+      await manager.connect();
 
-    final content = Demo.getShortReceiptContent();
-    var bytes = byteType == 1
-        ? await ESCPrinterService(null).getSamplePosBytes(
-            paperSizeWidthMM: paperWidth,
-            maxPerLine: charPerLine,
-            profile: profile)
-        : byteType == 2
-            ? await ESCPrinterService(null).getPdfBytes(
-                paperSizeWidthMM: paperWidth,
-                maxPerLine: charPerLine,
-                profile: profile)
-            : (await WebcontentConverter.contentToImage(
-                content: content,
-                executablePath: WebViewHelper.executablePath(),
-              ))
-                .toList();
-    List<int> data = [];
-    if (byteType == 3) {
-      var service = ESCPrinterService(Uint8List.fromList(bytes));
-      data = await service.getBytes(
-        paperSizeWidthMM: paperWidth,
-        maxPerLine: charPerLine,
-      );
-      if (bytes.length > 0) {
-        var dir = await getTemporaryDirectory();
-        var path = dir.path + "\\receipt.jpg";
-        File file = File(path);
-        await file.writeAsBytes(bytes);
-      }
-    } else
-      data = bytes;
+      final content = Demo.getShortReceiptContent();
+      var bytes = byteType == 1
+          ? await ESCPrinterService(null).getSamplePosBytes(
+              paperSizeWidthMM: paperWidth,
+              maxPerLine: charPerLine,
+              profile: profile)
+          : byteType == 2
+              ? await ESCPrinterService(null).getPdfBytes(
+                  paperSizeWidthMM: paperWidth,
+                  maxPerLine: charPerLine,
+                  profile: profile)
+              : (await WebcontentConverter.contentToImage(
+                  content: content,
+                  executablePath: WebViewHelper.executablePath(),
+                ))
+                  .toList();
+      List<int> data = [];
+      if (byteType == 3) {
+        var service = ESCPrinterService(Uint8List.fromList(bytes));
+        data = await service.getBytes(
+          paperSizeWidthMM: paperWidth,
+          maxPerLine: charPerLine,
+        );
+        if (bytes.length > 0) {
+          var dir = await getTemporaryDirectory();
+          var path = dir.path + "\\receipt.jpg";
+          File file = File(path);
+          await file.writeAsBytes(bytes);
+        }
+      } else
+        data = bytes;
 
-    manager.writeBytes(data).catchError((err) {
+      await manager.writeBytes(data);
+    } catch (e) {
       var snackBar = SnackBar(
-        content: Text(err.toString()),
+        content: Text(e.toString()),
+        backgroundColor: Colors.red,
       );
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
-    });
+    }
   }
 
   _tsplPrint(USBPrinter printer) async {
-    int width = 105;
-    int height = 22;
-    int labelWidth = 35;
+    try {
+      int width = 105;
+      int height = 22;
+      int labelWidth = 35;
 
-    var image = await ESCPrinterService(null)
-        .generateLabel(width, height, labelWidth, 1.5, 3);
+      var image = await ESCPrinterService(null)
+          .generateLabel(width, height, labelWidth, 1.5, 3);
 
-    if (image != null) {
-      var dir = await getTemporaryDirectory();
-      var path = dir.path + "\\receipt.png";
-      File file = File(path);
-      await file.writeAsBytes(img.encodePng(image));
-      // OpenFilex.open(path);
-      // for (int i = 1; i <= 1; i++) {
-      //   var manager = USBPrinterManager(printer);
-      //   TsplGenerator generator = TsplGenerator();
-      //   generator.addSize(width: width, height: height);
-      //   generator.addGap(3);
-      //   generator.addSpeed(4);
-      //   generator.addDensity(Density.density15);
-      //   generator.addDirection(Direction.backWord);
-      //   generator.addTear(Tear.on);
-      //   generator.addCodePageUtf8();
-      //   generator.addCls();
-      //   generator.addImage(image, needGrayscale: true);
-      //   generator.addPrint(1);
-      //   _data = generator.byte;
-      //   manager.writeBytes(_data);
-      // }
+      if (image != null) {
+        var dir = await getTemporaryDirectory();
+        var path = dir.path + "\\receipt.png";
+        File file = File(path);
+        await file.writeAsBytes(img.encodePng(image));
+
+        // TODO: Implement actual TSPL sending logic if required,
+        // currently code only generated image.
+        // Logic from original file seemed incomplete/commented out for sending.
+        // Alerting user of success generation.
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text("Label generated at $path"),
+              backgroundColor: Colors.green),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("TSPL Error: $e"), backgroundColor: Colors.red),
+      );
     }
   }
 }

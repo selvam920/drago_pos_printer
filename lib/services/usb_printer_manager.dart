@@ -33,10 +33,11 @@ class USBPrinterManager extends PrinterManager {
   Future connect({Duration? timeout = const Duration(seconds: 5)}) async {
     if (Platform.isWindows) {
       try {
-        docInfo = calloc<DOC_INFO_1>()
-          ..ref.pDocName = pDocName
-          ..ref.pOutputFile = nullptr
-          ..ref.pDatatype = pDataType;
+        docInfo =
+            calloc<DOC_INFO_1>()
+              ..ref.pDocName = pDocName
+              ..ref.pOutputFile = nullptr
+              ..ref.pDatatype = pDataType;
         szPrinterName = printer.name!.toNativeUtf16();
 
         final phPrinter = calloc<HANDLE>();
@@ -49,8 +50,10 @@ class USBPrinterManager extends PrinterManager {
         return Future.error(e.toString());
       }
     } else if (Platform.isAndroid) {
-      var usbDevice =
-          await usbPrinter.connect(printer.vendorId!, printer.productId!);
+      var usbDevice = await usbPrinter.connect(
+        printer.vendorId!,
+        printer.productId!,
+      );
       if (usbDevice == null) {
         return Future.error('Usb device is empty');
       }
@@ -148,5 +151,17 @@ class USBPrinterManager extends PrinterManager {
         return Future.error(e.toString());
       }
     }
+  }
+
+  @override
+  Future<void> pair(POSPrinter device) {
+    // TODO: implement pair
+    throw UnimplementedError();
+  }
+
+  @override
+  Stream<POSPrinter> scan() {
+    // TODO: implement scan
+    throw UnimplementedError();
   }
 }

@@ -1,0 +1,8 @@
+Analyzing bluetooth_printer_screen.dart...                      
+
+   info - 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre - example\lib\bluetooth_printer_screen.dart:191:15 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - example\lib\bluetooth_printer_screen.dart:281:32 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - example\lib\bluetooth_printer_screen.dart:282:33 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - example\lib\bluetooth_printer_screen.dart:477:24 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - example\lib\bluetooth_printer_screen.dart:479:43 - deprecated_member_use
+

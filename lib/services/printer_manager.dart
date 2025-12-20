@@ -8,4 +8,8 @@ abstract class PrinterManager {
   Future writeBytes(List<int> data);
 
   Future disconnect({Duration? timeout});
+
+  Stream<POSPrinter> scan();
+
+  Future<void> pair(POSPrinter device);
 }

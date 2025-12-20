@@ -58,3 +58,6 @@
 
 ## 1.1.1
 * Update package version
+
+## 1.1.2
+* Added bluetooth scan & pair feature

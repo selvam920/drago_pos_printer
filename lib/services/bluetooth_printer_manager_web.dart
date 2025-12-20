@@ -19,4 +19,12 @@ class BluetoothPrinterManager {
   Future writeBytes(List<int> data) {
     throw Exception('Platform does not support');
   }
+
+  Stream<BluetoothPrinter> scan() {
+    throw Exception('Platform does not support');
+  }
+
+  Future<void> pair(BluetoothPrinter device) {
+    throw Exception('Platform does not support');
+  }
 }

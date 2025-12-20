@@ -15,8 +15,11 @@ class NetworkPrinterManager extends PrinterManager {
   /// [connect] let you connect to a network printer
   Future connect({Duration? timeout = const Duration(seconds: 5)}) async {
     try {
-      this.socket = await Socket.connect(printer.address, printer.port!,
-          timeout: timeout);
+      this.socket = await Socket.connect(
+        printer.address,
+        printer.port!,
+        timeout: timeout,
+      );
     } catch (e) {
       return Future.error(e.toString());
     }
@@ -27,13 +30,8 @@ class NetworkPrinterManager extends PrinterManager {
     var results = await findNetworkPrinter();
     return [
       ...results
-          .map((e) => NetWorkPrinter(
-                id: e,
-                name: e,
-                address: e,
-                type: 0,
-              ))
-          .toList()
+          .map((e) => NetWorkPrinter(id: e, name: e, address: e, type: 0))
+          .toList(),
     ];
   }
 
@@ -54,5 +52,18 @@ class NetworkPrinterManager extends PrinterManager {
     if (timeout != null) {
       await Future.delayed(timeout, () => null);
     }
+  }
+
+  @override
+  Stream<POSPrinter> scan() async* {
+    var results = await discover();
+    for (var device in results) {
+      yield device;
+    }
+  }
+
+  @override
+  Future<void> pair(POSPrinter device) async {
+    // Network printers do not require pairing
   }
 }

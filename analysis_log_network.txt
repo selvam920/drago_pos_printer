@@ -1,0 +1,4 @@
+Analyzing network_printer_screen.dart...                        
+
+warning - Unused import: 'dart:typed_data' - example\lib\network_printer_screen.dart:1:8 - unused_import
+
