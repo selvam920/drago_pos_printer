@@ -224,17 +224,12 @@ class EscGenerator {
   //**************************** Public command generators ************************
   /// Clear the buffer and reset text styles.
   ///
-  /// Sends ESC @ to initialize the printer (returns to standard mode),
-  /// then explicitly cancels any page mode to ensure continuous roll
-  /// paper printing (no fixed page height like A4).
+  /// Sends ESC @ to initialize the printer, which returns it to
+  /// standard (continuous) mode — the default for roll paper printers.
+  /// ESC @ already cancels page mode on compliant printers.
   List<int> reset() {
     List<int> bytes = [];
-    bytes += cInit.codeUnits;
-    // Cancel page mode if active — ensures standard (continuous) mode
-    // for roll paper printers so there is no fixed page height.
-    bytes += cFormFeed.codeUnits;
-    // Re-initialize after form feed to clear any page mode state.
-    bytes += cInit.codeUnits;
+    bytes += cInit.codeUnits; // ESC @ — initialize / cancel page mode
     _styles = PosStyles();
     bytes += setGlobalCodeTable(_codeTable);
     bytes += setGlobalFont(_font);
@@ -244,13 +239,14 @@ class EscGenerator {
   /// Explicitly set continuous roll paper mode.
   ///
   /// Call this after [reset] if your printer still prints with a fixed
-  /// page height (e.g. A4). This sends a form-feed to cancel page mode,
-  /// then re-initializes to ensure standard (continuous) printing.
+  /// page height (e.g. A4). This sends CAN (0x18) to abort any active
+  /// page mode data, then ESC @ to re-initialize, ensuring continuous
+  /// roll paper printing with no fixed page length.
   List<int> setRollPaperMode() {
     List<int> bytes = [];
-    // Cancel any active page mode.
-    bytes += cFormFeed.codeUnits;
-    // Re-initialize to standard mode.
+    // CAN (0x18) — cancel data in page mode without printing / advancing.
+    bytes += [0x18];
+    // ESC @ — re-initialize to standard (continuous) mode.
     bytes += cInit.codeUnits;
     _styles = PosStyles();
     return bytes;

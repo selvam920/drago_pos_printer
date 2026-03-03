@@ -64,3 +64,6 @@
 
 ## 1.1.3
 * Improved printing
+
+## 1.1.4
+* Improved usb printing
