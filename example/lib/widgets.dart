@@ -75,7 +75,7 @@ class _PaperSettingsCardState extends State<PaperSettingsCard> {
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(
-              value: _selectedSize,
+              initialValue: _selectedSize,
               decoration: InputDecoration(
                 labelText: 'Paper Size',
                 border: OutlineInputBorder(
@@ -148,7 +148,7 @@ class _PaperSettingsCardState extends State<PaperSettingsCard> {
             ],
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
-              value: widget.profileName,
+              initialValue: widget.profileName,
               decoration: InputDecoration(
                 labelText: 'Printer Profile',
                 border: OutlineInputBorder(
