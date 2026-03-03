@@ -1,25 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:drago_pos_printer/drago_pos_printer.dart';
-
 import 'home_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  /// ensure printer profile is loaded
   await CapabilityProfile.ensureProfileLoaded();
-  print("ensured");
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
-class MyApp extends StatefulWidget {
-  @override
-  _MyAppState createState() => _MyAppState();
-}
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
-class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(home: HomeScreen());
+    return MaterialApp(
+      title: 'Drago POS Printer',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        colorSchemeSeed: const Color(0xFF3F51B5),
+        useMaterial3: true,
+        brightness: Brightness.light,
+        cardTheme: CardThemeData(
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: BorderSide(color: Colors.grey.shade200),
+          ),
+        ),
+        appBarTheme: const AppBarTheme(
+          centerTitle: false,
+          elevation: 0,
+          scrolledUnderElevation: 1,
+        ),
+      ),
+      home: const HomeScreen(),
+    );
   }
 }

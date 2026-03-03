@@ -17,7 +17,7 @@ class NetworkAddress {
   String ip;
 }
 
-/// Pings a given subnet (xxx.xxx.xxx) on a given port using [discover] method.
+/// Pings a given subnet (xxx.xxx.xxx) on a given port using [discover2] method.
 class NetworkAnalyzer {
   /// Pings a given [subnet] (xxx.xxx.xxx) on a given [port].
   ///
@@ -33,31 +33,41 @@ class NetworkAnalyzer {
 
     final out = StreamController<NetworkAddress>();
     final futures = <Future<Socket>>[];
+    int pending = 255;
+
+    void _checkDone() {
+      pending--;
+      if (pending <= 0) {
+        out.close();
+      }
+    }
+
     for (int i = 1; i < 256; ++i) {
       final host = '$subnet.$i';
       final Future<Socket> f = _ping(host, port, timeout);
       futures.add(f);
       f.then((socket) {
         socket.destroy();
-        out.sink.add(NetworkAddress(host, true));
+        if (!out.isClosed) {
+          out.sink.add(NetworkAddress(host, true));
+        }
+        _checkDone();
       }).catchError((dynamic e) {
         if (e is! SocketException) {
+          _checkDone();
           return;
         }
 
         // Check if connection timed out or we got one of predefined errors
         if (e.osError == null || _errorCodes.contains(e.osError?.errorCode)) {
-          out.sink.add(NetworkAddress(host, false));
-        } else {
-          // Error 23,24: Too many open files in system
-          return;
+          if (!out.isClosed) {
+            out.sink.add(NetworkAddress(host, false));
+          }
         }
+        // Error 23,24: Too many open files in system — skip silently
+        _checkDone();
       });
     }
-
-    Future.wait<Socket>(futures)
-        .then<void>((sockets) => out.close())
-        .catchError((dynamic e) => out.close());
 
     return out.stream;
   }

@@ -42,10 +42,9 @@ class USBPrinterManager extends PrinterManager {
 
         final phPrinter = calloc<HANDLE>();
         if (OpenPrinter(szPrinterName, phPrinter, nullptr) == FALSE) {
-          return true;
-        } else {
-          this.hPrinter = phPrinter.value;
+          return Future.error('Failed to open printer: ${printer.name}');
         }
+        this.hPrinter = phPrinter.value;
       } catch (e) {
         return Future.error(e.toString());
       }
@@ -99,39 +98,56 @@ class USBPrinterManager extends PrinterManager {
       final dwJob = StartDocPrinter(hPrinter, 1, docInfo!);
       if (dwJob == 0) {
         ClosePrinter(hPrinter);
+        return Future.error('StartDocPrinter failed');
       }
       // Start a page.
       if (StartPagePrinter(hPrinter) == 0) {
         EndDocPrinter(hPrinter);
         ClosePrinter(hPrinter);
+        return Future.error('StartPagePrinter failed');
       }
 
-      // Send the data to the printer.
-      final lpData = data.toUint8();
-      dwCount = data.length;
-      if (WritePrinter(hPrinter, lpData, dwCount!, dwBytesWritten!) == 0) {
-        EndPagePrinter(hPrinter);
-        EndDocPrinter(hPrinter);
-        ClosePrinter(hPrinter);
+      // Send data to the printer in chunks to avoid buffer overflow.
+      // Writing all data at once can cause some printers to paginate
+      // (e.g., printing at A4 height) instead of continuous roll paper.
+      const int chunkSize = 4096;
+      int totalWritten = 0;
+      final chunks = data.chunkBy(chunkSize);
+
+      for (var chunk in chunks) {
+        final lpData = chunk.toUint8();
+        final chunkLen = chunk.length;
+
+        final writeResult =
+            WritePrinter(hPrinter, lpData, chunkLen, dwBytesWritten!);
+        totalWritten += dwBytesWritten!.value;
+
+        // Free the native memory after each chunk write.
+        free(lpData);
+
+        if (writeResult == 0) {
+          EndPagePrinter(hPrinter);
+          EndDocPrinter(hPrinter);
+          ClosePrinter(hPrinter);
+          return Future.error('WritePrinter failed after $totalWritten bytes');
+        }
       }
 
       // End the page.
       if (EndPagePrinter(hPrinter) == 0) {
         EndDocPrinter(hPrinter);
         ClosePrinter(hPrinter);
+        return Future.error('EndPagePrinter failed');
       }
 
       // Inform the spooler that the document is ending.
       if (EndDocPrinter(hPrinter) == 0) {
         ClosePrinter(hPrinter);
+        return Future.error('EndDocPrinter failed');
       }
-
-      // Check to see if correct number of bytes were written.
-      if (dwBytesWritten!.value != dwCount) {}
 
       // Tidy up the printer handle.
       ClosePrinter(hPrinter);
-      // await disconnect();
     } else if (Platform.isAndroid) {
       try {
         await connect();
@@ -160,8 +176,10 @@ class USBPrinterManager extends PrinterManager {
   }
 
   @override
-  Stream<POSPrinter> scan() {
-    // TODO: implement scan
-    throw UnimplementedError();
+  Stream<POSPrinter> scan() async* {
+    final results = await discover();
+    for (final device in results) {
+      yield device;
+    }
   }
 }

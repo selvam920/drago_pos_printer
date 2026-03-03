@@ -52,6 +52,11 @@ const cBarcodeSetH = '${gs}h'; // Set barcode height [N]
 const cBarcodeSetW = '${gs}w'; // Set barcode width [N]
 const cBarcodePrint = '${gs}k'; // Print barcode
 
+// Page Mode
+const cPageMode = '${esc}L'; // Select page mode
+const cFormFeed = '\x0C'; // Print data in page mode buffer / cancel page mode
+const cSetPageLength = '${esc}C'; // Set page length [n] lines
+
 // Cash Drawer Open
 const cCashDrawerPin2 = '${esc}p030';
 const cCashDrawerPin5 = '${esc}p130';

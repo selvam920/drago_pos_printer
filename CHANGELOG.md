@@ -61,3 +61,6 @@
 
 ## 1.1.2
 * Added bluetooth scan & pair feature
+
+## 1.1.3
+* Improved printing
