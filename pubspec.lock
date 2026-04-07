@@ -125,10 +125,10 @@ packages:
     dependency: "direct main"
     description:
       name: drago_usb_printer
-      sha256: "614ec4e73ef03301166376c95275f66582a6ba76b9cc9f1d40ad9ba2ca11b34d"
+      sha256: "6fb00522aadf04236d0082dbb494b011ef539a734fc196f902f8c7a6947b6cb5"
       url: "https://pub.dev"
     source: hosted
-    version: "0.1.3"
+    version: "0.1.4"
   fake_async:
     dependency: transitive
     description:
