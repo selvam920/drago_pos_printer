@@ -13,6 +13,7 @@ import com.example.drago_pos_printer.R
 import com.example.drago_pos_printer.usb.USBPrinterService
 import java.nio.charset.Charset
 import java.util.*
+import kotlin.math.min
 
 class USBPrinterAdapter private constructor() {
 
@@ -157,9 +158,7 @@ class USBPrinterAdapter private constructor() {
             Thread(Runnable {
                 synchronized(printLock) {
                     val bytes: ByteArray = text.toByteArray(Charset.forName("UTF-8"))
-                    val b: Int =
-                        mUsbDeviceConnection!!.bulkTransfer(mEndPoint, bytes, bytes.size, 100000)
-                    Log.i(LOG_TAG, "Return code: $b")
+                    sendChunked(bytes)
                 }
             }).start()
             return true
@@ -170,24 +169,16 @@ class USBPrinterAdapter private constructor() {
     }
 
     fun printRawData(data: String): Boolean {
-        Log.v(LOG_TAG, "Printing raw data: $data")
+        Log.v(LOG_TAG, "Printing raw data")
         val isConnected = openConnection()
         if (isConnected) {
             Log.v(LOG_TAG, "Connected to device")
-            Thread(object : Runnable {
-                override fun run() {
-                    synchronized(printLock) {
-                        val bytes: ByteArray = Base64.decode(data, Base64.DEFAULT)
-                        val b: Int = mUsbDeviceConnection!!.bulkTransfer(
-                            mEndPoint,
-                            bytes,
-                            bytes.size,
-                            100000
-                        )
-                        Log.i(LOG_TAG, "Return code: " + b)
-                    }
+            Thread {
+                synchronized(printLock) {
+                    val bytes: ByteArray = Base64.decode(data, Base64.DEFAULT)
+                    sendChunked(bytes)
                 }
-            }).start()
+            }.start()
             return true
         } else {
             Log.v(LOG_TAG, "Failed to connected to device")
@@ -199,48 +190,11 @@ class USBPrinterAdapter private constructor() {
         Log.v(LOG_TAG, "Printing bytes")
         val isConnected = openConnection()
         if (isConnected) {
-            val chunkSize = mEndPoint!!.maxPacketSize
-            Log.v(LOG_TAG, "Max Packet Size: $chunkSize")
             Log.v(LOG_TAG, "Connected to device")
             Thread {
                 synchronized(printLock) {
-                    val vectorData: Vector<Byte> = Vector()
-                    for (i in bytes.indices) {
-                        val `val`: Int = bytes[i]
-                        vectorData.add(`val`.toByte())
-                    }
-                    val temp: Array<Any> = vectorData.toTypedArray()
-                    val bytedata = ByteArray(temp.size)
-                    for (i in temp.indices) {
-                        bytedata[i] = temp[i] as Byte
-                    }
-                    var b: Int = 0
-                    if (mUsbDeviceConnection != null) {
-                        if (bytedata.size > chunkSize) {
-                            var chunks: Int = bytedata.size / chunkSize
-                            if (bytedata.size % chunkSize > 0) {
-                                ++chunks
-                            }
-                            for (i in 0 until chunks) {
-                                val buffer: ByteArray =
-                                    bytedata.copyOfRange(i * chunkSize, chunkSize + i * chunkSize)
-                                b = mUsbDeviceConnection!!.bulkTransfer(
-                                    mEndPoint,
-                                    buffer,
-                                    chunkSize,
-                                    100000
-                                )
-                            }
-                        } else {
-                            b = mUsbDeviceConnection!!.bulkTransfer(
-                                mEndPoint,
-                                bytedata,
-                                bytedata.size,
-                                100000
-                            )
-                        }
-                        Log.i(LOG_TAG, "Return code: $b")
-                    }
+                    val bytedata = ByteArray(bytes.size) { bytes[it].toByte() }
+                    sendChunked(bytedata)
                 }
             }.start()
             return true
@@ -248,6 +202,37 @@ class USBPrinterAdapter private constructor() {
             Log.v(LOG_TAG, "Failed to connected to device")
             return false
         }
+    }
+
+    private fun bulkTransferWithRetry(buffer: ByteArray, length: Int, maxRetries: Int = 3): Int {
+        for (attempt in 0 until maxRetries) {
+            val result = mUsbDeviceConnection!!.bulkTransfer(mEndPoint, buffer, length, 100000)
+            if (result >= 0) return result
+            Log.w(LOG_TAG, "bulkTransfer failed (attempt ${attempt + 1}/$maxRetries, error $result, length $length)")
+            try { Thread.sleep(50L * (attempt + 1)) } catch (_: InterruptedException) {}
+        }
+        return -1
+    }
+
+    private fun sendChunked(data: ByteArray) {
+        if (mUsbDeviceConnection == null || mEndPoint == null) {
+            Log.e(LOG_TAG, "No USB connection or endpoint")
+            return
+        }
+        val chunkSize = mEndPoint!!.maxPacketSize
+        val totalSize = data.size
+        var offset = 0
+        while (offset < totalSize) {
+            val length = min(chunkSize, totalSize - offset)
+            val buffer = data.copyOfRange(offset, offset + length)
+            val b = bulkTransferWithRetry(buffer, length)
+            if (b < 0) {
+                Log.e(LOG_TAG, "bulk transfer failed at offset $offset (error $b, chunkSize $chunkSize)")
+                return
+            }
+            offset += length
+        }
+        Log.i(LOG_TAG, "sendChunked complete, totalSize: $totalSize")
     }
 
     companion object {
