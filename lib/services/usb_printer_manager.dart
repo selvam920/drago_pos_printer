@@ -16,13 +16,12 @@ class USBPrinterManager extends PrinterManager {
   var usbPrinter = DragoUsbPrinter();
 
   /// [win32]
-  Pointer<IntPtr>? phPrinter = calloc<HANDLE>();
   Pointer<Utf16> pDocName = 'My Document'.toNativeUtf16();
   Pointer<Utf16> pDataType = 'RAW'.toNativeUtf16();
   Pointer<Uint32>? dwBytesWritten = calloc<DWORD>();
   Pointer<DOC_INFO_1>? docInfo;
   late Pointer<Utf16> szPrinterName;
-  late int hPrinter;
+  late PRINTER_HANDLE hPrinter;
   int? dwCount;
 
   USBPrinterManager(POSPrinter printer) {
@@ -35,16 +34,19 @@ class USBPrinterManager extends PrinterManager {
       try {
         docInfo =
             calloc<DOC_INFO_1>()
-              ..ref.pDocName = pDocName
-              ..ref.pOutputFile = nullptr
-              ..ref.pDatatype = pDataType;
+              ..ref.pDocName = PWSTR(pDocName)
+              ..ref.pOutputFile = PWSTR(nullptr.cast<Utf16>())
+              ..ref.pDatatype = PWSTR(pDataType);
         szPrinterName = printer.name!.toNativeUtf16();
 
-        final phPrinter = calloc<HANDLE>();
-        if (OpenPrinter(szPrinterName, phPrinter, nullptr) == FALSE) {
+        final phPrinterPtr = calloc<Pointer>();
+        final openResult = OpenPrinter(PCWSTR(szPrinterName), phPrinterPtr, nullptr);
+        if (!openResult.value) {
+          calloc.free(phPrinterPtr);
           return Future.error('Failed to open printer: ${printer.name}');
         }
-        this.hPrinter = phPrinter.value;
+        hPrinter = PRINTER_HANDLE(phPrinterPtr.value);
+        calloc.free(phPrinterPtr);
       } catch (e) {
         return Future.error(e.toString());
       }
@@ -70,7 +72,6 @@ class USBPrinterManager extends PrinterManager {
     if (Platform.isWindows) {
       // Tidy up the printer handle.
       ClosePrinter(hPrinter);
-      free(phPrinter!);
       free(pDocName);
       free(pDataType);
       free(dwBytesWritten!);
@@ -101,7 +102,7 @@ class USBPrinterManager extends PrinterManager {
         return Future.error('StartDocPrinter failed');
       }
       // Start a page.
-      if (StartPagePrinter(hPrinter) == 0) {
+      if (!StartPagePrinter(hPrinter)) {
         EndDocPrinter(hPrinter);
         ClosePrinter(hPrinter);
         return Future.error('StartPagePrinter failed');
@@ -125,7 +126,7 @@ class USBPrinterManager extends PrinterManager {
         // Free the native memory after each chunk write.
         free(lpData);
 
-        if (writeResult == 0) {
+        if (!writeResult) {
           EndPagePrinter(hPrinter);
           EndDocPrinter(hPrinter);
           ClosePrinter(hPrinter);
@@ -134,14 +135,14 @@ class USBPrinterManager extends PrinterManager {
       }
 
       // End the page.
-      if (EndPagePrinter(hPrinter) == 0) {
+      if (!EndPagePrinter(hPrinter)) {
         EndDocPrinter(hPrinter);
         ClosePrinter(hPrinter);
         return Future.error('EndPagePrinter failed');
       }
 
       // Inform the spooler that the document is ending.
-      if (EndDocPrinter(hPrinter) == 0) {
+      if (!EndDocPrinter(hPrinter)) {
         ClosePrinter(hPrinter);
         return Future.error('EndDocPrinter failed');
       }
