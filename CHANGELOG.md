@@ -70,3 +70,6 @@
 
 ## 1.1.6
 * Support android 17
+
+## 1.1.7 
+Fix android build issue
