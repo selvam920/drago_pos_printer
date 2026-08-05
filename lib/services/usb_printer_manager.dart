@@ -43,7 +43,7 @@ class USBPrinterManager extends PrinterManager {
         final openResult = OpenPrinter(PCWSTR(szPrinterName), phPrinterPtr, nullptr);
         if (!openResult.value) {
           calloc.free(phPrinterPtr);
-          return Future.error('Failed to open printer: ${printer.name}');
+          return await Future.error('Failed to open printer: ${printer.name}');
         }
         hPrinter = PRINTER_HANDLE(phPrinterPtr.value);
         calloc.free(phPrinterPtr);

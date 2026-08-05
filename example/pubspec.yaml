@@ -20,7 +20,7 @@ dependencies:
   # qr_flutter: ^4.0.0
   printing: ^5.13.4
   win32: ^6.2.0
-  permission_handler: ^12.0.1
+  permission_handler: ^13.0.0
 
   drago_pos_printer:
     path: ../

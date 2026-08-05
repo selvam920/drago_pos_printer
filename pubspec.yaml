@@ -14,10 +14,10 @@ dependencies:
   plugin_platform_interface: ^2.0.2
 
   hex: ^0.2.0
-  image: ^4.5.4
+  image: ^4.9.1
   connectivity_plus: ^7.0.0
   drago_usb_printer: ^0.1.4
-  drago_blue_printer: ^1.0.0
+  drago_blue_printer: ^1.0.1
   network_info_plus: ^8.1.0
   printing: ^5.14.2
   win32: ^6.2.0

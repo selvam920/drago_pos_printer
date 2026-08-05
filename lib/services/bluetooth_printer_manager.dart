@@ -24,7 +24,7 @@ class BluetoothPrinterManager extends PrinterManager {
         try {
           devices = await bluetooth.getBondedDevices();
         } catch (e) {
-          return Future.error("Failed to get bonded devices: $e");
+          return await Future.error("Failed to get bonded devices: $e");
         }
 
         BluetoothDevice? device;
