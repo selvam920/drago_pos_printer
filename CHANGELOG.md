@@ -67,3 +67,6 @@
 
 ## 1.1.4
 * Improved usb printing
+
+## 1.1.6
+* Support android 17
