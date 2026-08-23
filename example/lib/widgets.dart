@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:drago_pos_printer/drago_pos_printer.dart';
 
 /// Reusable paper size settings card used across all printer screens.
