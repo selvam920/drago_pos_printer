@@ -73,3 +73,6 @@
 
 ## 1.1.7 
 Fix android build issue
+
+## 1.1.8
+Upgrade android AGP

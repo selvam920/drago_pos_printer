@@ -117,18 +117,18 @@ packages:
     dependency: "direct main"
     description:
       name: drago_blue_printer
-      sha256: "336db1cac4ed3bdaca1d8f8251d1b5ec06edb93d4142e0e6255a2b468b77cfee"
+      sha256: f10de0269c1e4e4bcb0981eee9079cd82be89cd252265fd3e6085b4fe6994bc9
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.1"
+    version: "1.0.2"
   drago_usb_printer:
     dependency: "direct main"
     description:
       name: drago_usb_printer
-      sha256: "6fb00522aadf04236d0082dbb494b011ef539a734fc196f902f8c7a6947b6cb5"
+      sha256: "2918b06f527a9d180915cd91ded5d2c1b396a1b07a9758b6da6b77670f36efab"
       url: "https://pub.dev"
     source: hosted
-    version: "0.1.4"
+    version: "0.1.5"
   fake_async:
     dependency: transitive
     description:
