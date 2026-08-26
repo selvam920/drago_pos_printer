@@ -1,10 +1,10 @@
-group 'com.example.drago_pos_printer'
-version '1.0-SNAPSHOT'
-
 plugins {
     id 'com.android.library'
     id 'kotlin-android'
 }
+
+group 'com.example.drago_pos_printer'
+version '1.0-SNAPSHOT'
 
 rootProject.allprojects {
     repositories {
