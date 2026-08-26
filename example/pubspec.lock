@@ -133,10 +133,10 @@ packages:
     dependency: transitive
     description:
       name: cupertino_ui
-      sha256: "7ed8ce4159d342eec4c65f4ea6eec57adaf9365404378541f38efc1da20a5b3d"
+      sha256: "2137c0d41f3b62cc4d3d2495e6c354bd6b6133cd21c6bb155736cc31dbd49a11"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.0"
+    version: "1.0.1"
   dbus:
     dependency: transitive
     description:
@@ -175,15 +175,15 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "1.1.7"
+    version: "1.1.8"
   drago_usb_printer:
     dependency: transitive
     description:
       name: drago_usb_printer
-      sha256: "6fb00522aadf04236d0082dbb494b011ef539a734fc196f902f8c7a6947b6cb5"
+      sha256: "2918b06f527a9d180915cd91ded5d2c1b396a1b07a9758b6da6b77670f36efab"
       url: "https://pub.dev"
     source: hosted
-    version: "0.1.4"
+    version: "0.1.5"
   easy_logger:
     dependency: transitive
     description:
@@ -400,10 +400,10 @@ packages:
     dependency: "direct main"
     description:
       name: material_ui
-      sha256: "4f3f38b9953df0a87d6bf5f21880029f77c47048487d5339410c39936be4683b"
+      sha256: "7ba1ca315d50a004791dbab290417c52a61466d56db2822fe3c5c2994903110c"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.1"
+    version: "1.1.0"
   meta:
     dependency: transitive
     description:
