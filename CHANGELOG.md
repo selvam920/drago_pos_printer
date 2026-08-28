@@ -76,3 +76,6 @@ Fix android build issue
 
 ## 1.1.8
 Upgrade android AGP
+
+## 1.1.9
+Fix android AGP
