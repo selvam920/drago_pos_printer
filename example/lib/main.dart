@@ -1,6 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:drago_pos_printer/drago_pos_printer.dart';
-import 'home_screen.dart';
+import 'studio_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,7 +33,7 @@ class MyApp extends StatelessWidget {
           scrolledUnderElevation: 1,
         ),
       ),
-      home: const HomeScreen(),
+      home: const PrinterStudioScreen(),
     );
   }
 }

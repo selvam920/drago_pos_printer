@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:drago_blue_printer/drago_blue_printer.dart';
+import 'package:flutter/services.dart';
 import 'package:drago_pos_printer/drago_pos_printer.dart';
 import 'package:drago_pos_printer/models/pos_printer.dart';
 import 'package:drago_pos_printer/services/chennel.dart';
@@ -16,7 +16,14 @@ class BluetoothPrinterManager extends PrinterManager {
   }
 
   /// [connect] let you connect to a bluetooth printer
-  Future connect({Duration? timeout = const Duration(seconds: 5)}) async {
+  @override
+  Future connect({Duration? timeout = const Duration(seconds: 5)}) =>
+      _connect(retry: true);
+
+  Future _connect({required bool retry}) async {
+    if (printer.address == null || printer.address!.isEmpty) {
+      return Future.error('Bluetooth printer has no address');
+    }
     try {
       if (Platform.isAndroid) {
         final bluetooth = DragoBluePrinter.instance;
@@ -59,11 +66,15 @@ class BluetoothPrinterManager extends PrinterManager {
         await iosChannel.invokeMethod('connect', params);
       }
     } catch (e) {
-      if ((e as dynamic).message == "already connected") {
-        await disconnect();
-        await connect();
-      } else
-        return Future.error(e.toString());
+      final msg = e is PlatformException ? e.message : null;
+      if (retry && msg == "already connected") {
+        // Retry exactly once so a stuck "already connected" cannot loop.
+        try {
+          await disconnect();
+        } catch (_) {}
+        return _connect(retry: false);
+      }
+      return Future.error(e.toString());
     }
   }
 
@@ -83,6 +94,8 @@ class BluetoothPrinterManager extends PrinterManager {
               name: r.name,
               address: r.address,
               type: r.type,
+              battery: r.battery,
+              connected: r.connected,
             ),
           )
           .toList();
@@ -115,6 +128,18 @@ class BluetoothPrinterManager extends PrinterManager {
     }
   }
 
+  /// Asks the connected printer whether it can take [job] (Android only;
+  /// call after [connect]). [PrinterReadiness.unknown] when it won't say.
+  Future<PrinterReadiness> checkStatus(List<int> job) async {
+    if (!Platform.isAndroid) return PrinterReadiness.unknown;
+    final q = PrinterStatusQuery.forJob(job);
+    try {
+      return q.parse(await DragoBluePrinter.instance.queryStatus(q.query));
+    } catch (_) {
+      return PrinterReadiness.unknown;
+    }
+  }
+
   /// [writeBytes] let you write raw list int data into socket
   @override
   Future writeBytes(
@@ -131,7 +156,7 @@ class BluetoothPrinterManager extends PrinterManager {
         Map<String, Object> args = Map();
         args['bytes'] = bytes;
         args['length'] = bytes.length;
-        iosChannel.invokeMethod('writeData', args);
+        await iosChannel.invokeMethod('writeData', args);
       }
     } catch (e) {
       return Future.error(e.toString());
@@ -139,6 +164,7 @@ class BluetoothPrinterManager extends PrinterManager {
   }
 
   /// [timeout]: milliseconds to wait after closing the socket
+  @override
   Future disconnect({Duration? timeout}) async {
     try {
       if (Platform.isAndroid) {

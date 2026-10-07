@@ -15,49 +15,74 @@ class USBPrinterManager extends PrinterManager {
   /// usb_serial
   var usbPrinter = DragoUsbPrinter();
 
-  /// [win32]
-  Pointer<Utf16> pDocName = 'My Document'.toNativeUtf16();
-  Pointer<Utf16> pDataType = 'RAW'.toNativeUtf16();
-  Pointer<Uint32>? dwBytesWritten = calloc<DWORD>();
-  Pointer<DOC_INFO_1>? docInfo;
-  late Pointer<Utf16> szPrinterName;
-  late PRINTER_HANDLE hPrinter;
-  int? dwCount;
+  /// [win32] spooler handle, open between [connect] and [disconnect].
+  PRINTER_HANDLE? _hPrinter;
+
+  /// [android] true between a successful [connect] and [disconnect].
+  bool _androidConnected = false;
 
   USBPrinterManager(POSPrinter printer) {
     super.printer = printer;
   }
 
+  /// Opens a spooler handle for [printer]; throws on failure, leaks nothing.
+  PRINTER_HANDLE _openWindowsPrinter() {
+    final name = printer.name;
+    if (name == null || name.isEmpty) {
+      throw Exception('Printer name is empty');
+    }
+    final szPrinterName = name.toNativeUtf16();
+    final phPrinterPtr = calloc<Pointer>();
+    try {
+      final ok = OpenPrinter(PCWSTR(szPrinterName), phPrinterPtr, nullptr);
+      if (!ok.value || phPrinterPtr.value == nullptr) {
+        throw Exception('Failed to open printer: $name');
+      }
+      return PRINTER_HANDLE(phPrinterPtr.value);
+    } finally {
+      calloc.free(phPrinterPtr);
+      calloc.free(szPrinterName);
+    }
+  }
+
+  void _closeWindowsPrinter() {
+    final h = _hPrinter;
+    _hPrinter = null;
+    if (h != null) {
+      try {
+        ClosePrinter(h);
+      } catch (_) {}
+    }
+  }
+
   @override
   Future connect({Duration? timeout = const Duration(seconds: 5)}) async {
     if (Platform.isWindows) {
+      if (_hPrinter != null) return;
       try {
-        docInfo =
-            calloc<DOC_INFO_1>()
-              ..ref.pDocName = PWSTR(pDocName)
-              ..ref.pOutputFile = PWSTR(nullptr.cast<Utf16>())
-              ..ref.pDatatype = PWSTR(pDataType);
-        szPrinterName = printer.name!.toNativeUtf16();
-
-        final phPrinterPtr = calloc<Pointer>();
-        final openResult = OpenPrinter(PCWSTR(szPrinterName), phPrinterPtr, nullptr);
-        if (!openResult.value) {
-          calloc.free(phPrinterPtr);
-          return await Future.error('Failed to open printer: ${printer.name}');
-        }
-        hPrinter = PRINTER_HANDLE(phPrinterPtr.value);
-        calloc.free(phPrinterPtr);
+        _hPrinter = _openWindowsPrinter();
       } catch (e) {
+        _hPrinter = null;
         return Future.error(e.toString());
       }
     } else if (Platform.isAndroid) {
-      var usbDevice = await usbPrinter.connect(
-        printer.vendorId!,
-        printer.productId!,
-      );
-      if (usbDevice == null) {
-        return Future.error('Usb device is empty');
+      if (_androidConnected) return;
+      final vendorId = printer.vendorId;
+      final productId = printer.productId;
+      if (vendorId == null || productId == null) {
+        return Future.error('USB printer has no vendorId/productId');
       }
+      bool? ok;
+      try {
+        ok = await usbPrinter.connect(vendorId, productId);
+      } catch (e) {
+        return Future.error('Failed to connect USB printer: $e');
+      }
+      if (ok != true) {
+        return Future.error(
+            'Failed to connect USB printer ($vendorId:$productId)');
+      }
+      _androidConnected = true;
     }
   }
 
@@ -70,110 +95,127 @@ class USBPrinterManager extends PrinterManager {
   @override
   Future disconnect({Duration? timeout}) async {
     if (Platform.isWindows) {
-      // Tidy up the printer handle.
-      ClosePrinter(hPrinter);
-      free(pDocName);
-      free(pDataType);
-      free(dwBytesWritten!);
-      free(docInfo!);
-      free(szPrinterName);
-
-      if (timeout != null) {
-        await Future.delayed(timeout, () => null);
-      }
-      return true;
+      _closeWindowsPrinter();
     } else if (Platform.isAndroid) {
-      await usbPrinter.close();
-      if (timeout != null) {
-        await Future.delayed(timeout, () => null);
+      if (_androidConnected) {
+        _androidConnected = false;
+        try {
+          await usbPrinter.close();
+        } catch (_) {
+          // Already closed / detached: nothing to clean up.
+        }
       }
     }
+    if (timeout != null) {
+      await Future.delayed(timeout);
+    }
+    return true;
   }
 
+  /// Writes [data] as one RAW spooler job (Windows) or bulk transfer
+  /// (Android). Uses the connection opened by [connect]; if none is open,
+  /// opens one for this write and closes it again afterwards.
   @override
   Future writeBytes(List<int> data, {int? vendorId, int? productId}) async {
     if (Platform.isWindows) {
-      await connect();
-
-      // Inform the spooler the document is beginning.
-      final dwJob = StartDocPrinter(hPrinter, 1, docInfo!);
-      if (dwJob == 0) {
-        ClosePrinter(hPrinter);
-        return Future.error('StartDocPrinter failed');
-      }
-      // Start a page.
-      if (!StartPagePrinter(hPrinter)) {
-        EndDocPrinter(hPrinter);
-        ClosePrinter(hPrinter);
-        return Future.error('StartPagePrinter failed');
-      }
-
-      // Send data to the printer in chunks to avoid buffer overflow.
-      // Writing all data at once can cause some printers to paginate
-      // (e.g., printing at A4 height) instead of continuous roll paper.
-      const int chunkSize = 4096;
-      int totalWritten = 0;
-      final chunks = data.chunkBy(chunkSize);
-
-      for (var chunk in chunks) {
-        final lpData = chunk.toUint8();
-        final chunkLen = chunk.length;
-
-        final writeResult =
-            WritePrinter(hPrinter, lpData, chunkLen, dwBytesWritten!);
-        totalWritten += dwBytesWritten!.value;
-
-        // Free the native memory after each chunk write.
-        free(lpData);
-
-        if (!writeResult) {
-          EndPagePrinter(hPrinter);
-          EndDocPrinter(hPrinter);
-          ClosePrinter(hPrinter);
-          return Future.error('WritePrinter failed after $totalWritten bytes');
-        }
-      }
-
-      // End the page.
-      if (!EndPagePrinter(hPrinter)) {
-        EndDocPrinter(hPrinter);
-        ClosePrinter(hPrinter);
-        return Future.error('EndPagePrinter failed');
-      }
-
-      // Inform the spooler that the document is ending.
-      if (!EndDocPrinter(hPrinter)) {
-        ClosePrinter(hPrinter);
-        return Future.error('EndDocPrinter failed');
-      }
-
-      // Tidy up the printer handle.
-      ClosePrinter(hPrinter);
-    } else if (Platform.isAndroid) {
+      final ownHandle = _hPrinter == null;
+      PRINTER_HANDLE h;
       try {
-        await connect();
-
-        var bytes = Uint8List.fromList(data);
-
-        int max = 16384;
-
-        /// maxChunk limit on android
-        var datas = bytes.chunkBy(max);
-        for (var data in datas) {
-          await usbPrinter.write(Uint8List.fromList(data));
-        }
-
-        await usbPrinter.close();
+        h = _hPrinter ?? _openWindowsPrinter();
       } catch (e) {
         return Future.error(e.toString());
+      }
+      final pDocName = 'My Document'.toNativeUtf16();
+      final pDataType = 'RAW'.toNativeUtf16();
+      final dwBytesWritten = calloc<DWORD>();
+      final docInfo = calloc<DOC_INFO_1>()
+        ..ref.pDocName = PWSTR(pDocName)
+        ..ref.pOutputFile = PWSTR(nullptr.cast<Utf16>())
+        ..ref.pDatatype = PWSTR(pDataType);
+      var docStarted = false;
+      var pageStarted = false;
+      try {
+        if (StartDocPrinter(h, 1, docInfo) == 0) {
+          throw Exception('StartDocPrinter failed');
+        }
+        docStarted = true;
+        if (!StartPagePrinter(h)) throw Exception('StartPagePrinter failed');
+        pageStarted = true;
+
+        // Send in chunks: writing all at once makes some drivers paginate.
+        const int chunkSize = 4096;
+        int totalWritten = 0;
+        for (final chunk in data.chunkBy(chunkSize)) {
+          final lpData = chunk.toUint8();
+          try {
+            final ok = WritePrinter(h, lpData, chunk.length, dwBytesWritten);
+            if (!ok) {
+              throw Exception('WritePrinter failed after $totalWritten bytes');
+            }
+            totalWritten += dwBytesWritten.value;
+          } finally {
+            calloc.free(lpData);
+          }
+        }
+
+        pageStarted = false;
+        if (!EndPagePrinter(h)) throw Exception('EndPagePrinter failed');
+        docStarted = false;
+        if (!EndDocPrinter(h)) throw Exception('EndDocPrinter failed');
+      } catch (e) {
+        return Future.error(e.toString());
+      } finally {
+        if (pageStarted) EndPagePrinter(h);
+        if (docStarted) EndDocPrinter(h);
+        if (ownHandle) {
+          try {
+            ClosePrinter(h);
+          } catch (_) {}
+        }
+        calloc.free(docInfo);
+        calloc.free(dwBytesWritten);
+        calloc.free(pDocName);
+        calloc.free(pDataType);
+      }
+    } else if (Platform.isAndroid) {
+      final ownConnection = !_androidConnected;
+      try {
+        await connect();
+        // maxChunk limit on android
+        for (final chunk in data.chunkBy(16384)) {
+          final ok = await usbPrinter.write(Uint8List.fromList(chunk));
+          if (ok == false) throw Exception('USB write failed');
+        }
+      } catch (e) {
+        return Future.error(e.toString());
+      } finally {
+        if (ownConnection) await disconnect();
       }
     }
   }
 
+  /// Asks the printer whether it can take [job] (Android only; uses the
+  /// vendor/product id stored by [connect]). [PrinterReadiness.unknown] on
+  /// any error, timeout or other platform.
+  Future<PrinterReadiness> checkStatus(List<int> job) async {
+    if (!Platform.isAndroid) return PrinterReadiness.unknown;
+    final q = PrinterStatusQuery.forJob(job);
+    try {
+      // Dynamic so this builds against drago_usb_printer versions that do
+      // not have queryStatus yet (NoSuchMethodError -> unknown).
+      final Uint8List? reply = await (usbPrinter as dynamic).queryStatus(
+        q.query,
+        timeout: const Duration(milliseconds: 1500),
+      ) as Uint8List?;
+      return q.parse(reply);
+    } catch (_) {
+      return PrinterReadiness.unknown;
+    }
+  }
+
   @override
-  Future<void> pair(POSPrinter device) {
-    // TODO: implement pair
-    throw UnimplementedError();
+  Future<void> pair(POSPrinter device) async {
+    // USB printers do not require pairing.
   }
 
   @override

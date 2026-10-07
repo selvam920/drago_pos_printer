@@ -162,28 +162,26 @@ packages:
     source: hosted
     version: "2.2.1"
   drago_blue_printer:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: drago_blue_printer
-      sha256: e13e7522547ce2aa862d2eb50dce3cc23ddbe92eefed2c07ba58fe4915f0e795
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.3"
+      path: "../../drago_blue_printer"
+      relative: true
+    source: path
+    version: "1.0.4"
   drago_pos_printer:
     dependency: "direct main"
     description:
       path: ".."
       relative: true
     source: path
-    version: "1.1.9"
+    version: "1.1.10"
   drago_usb_printer:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: drago_usb_printer
-      sha256: "651f032ffe2889ce9a0c2ef8d1e661991b0e09bceacefe201d0abf91335ba39f"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.1.6"
+      path: "../../drago_usb_printer"
+      relative: true
+    source: path
+    version: "0.1.7"
   easy_logger:
     dependency: transitive
     description:

@@ -20,6 +20,9 @@ class BluetoothPrinterManager {
     throw Exception('Platform does not support');
   }
 
+  Future<PrinterReadiness> checkStatus(List<int> job) async =>
+      PrinterReadiness.unknown;
+
   Stream<BluetoothPrinter> scan() {
     throw Exception('Platform does not support');
   }

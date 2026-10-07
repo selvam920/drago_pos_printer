@@ -119,8 +119,6 @@ class DragoPosPrinterPlugin : FlutterPlugin, MethodCallHandler, PluginRegistry.R
         currentActivity = binding.activity
         binding.addRequestPermissionsResultListener(this)
         binding.addActivityResultListener(this)
-        binding.addRequestPermissionsResultListener(this)
-        binding.addActivityResultListener(this)
     }
 
     override fun onDetachedFromActivity() {
@@ -138,7 +136,8 @@ class DragoPosPrinterPlugin : FlutterPlugin, MethodCallHandler, PluginRegistry.R
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?): Boolean {
-        return true
+        // Not ours: returning true would swallow other plugins' results.
+        return false
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray): Boolean {

@@ -11,8 +11,17 @@ import 'printer_manager.dart';
 class NetworkPrinterManager extends PrinterManager {
   Socket? socket;
 
+  /// Bytes the printer sent back since the last [checkStatus] / connect.
+  final List<int> _rx = [];
+  StreamSubscription<Uint8List>? _sub;
+  Completer<void>? _rxWaiter;
+
+  /// Set when the socket reported an error or closed; writes then fail
+  /// fast instead of throwing from a dead socket.
+  Object? _socketError;
+
   /// Whether the socket is currently connected.
-  bool get isConnected => socket != null;
+  bool get isConnected => socket != null && _socketError == null;
 
   /// Maximum bytes to write per chunk over the network.
   ///
@@ -39,19 +48,51 @@ class NetworkPrinterManager extends PrinterManager {
   Future connect({Duration? timeout = const Duration(seconds: 5)}) async {
     // Avoid opening multiple connections.
     if (isConnected) return;
+    // Drop a socket that died since the last connect.
+    if (socket != null) await disconnect();
+    final address = printer.address;
+    if (address == null || address.isEmpty) {
+      return Future.error('Network printer has no address');
+    }
 
     try {
-      socket = await Socket.connect(
-        printer.address,
+      final s = await Socket.connect(
+        address,
         printer.port ?? 9100,
-        timeout: timeout,
+        timeout: timeout ?? const Duration(seconds: 5),
+      );
+      socket = s;
+      _socketError = null;
+      _rx.clear();
+      // Never leave socket.done / stream errors unhandled: an unhandled
+      // socket error future crashes the isolate.
+      s.done.catchError((Object e) {
+        _socketError ??= e;
+      });
+      _sub = s.listen(
+        (data) {
+          _rx.addAll(data);
+          final w = _rxWaiter;
+          if (w != null && !w.isCompleted) w.complete();
+        },
+        onError: (Object e) {
+          _socketError ??= e;
+          final w = _rxWaiter;
+          if (w != null && !w.isCompleted) w.complete();
+        },
+        onDone: () {
+          _socketError ??= 'Socket closed by printer';
+          final w = _rxWaiter;
+          if (w != null && !w.isCompleted) w.complete();
+        },
+        cancelOnError: true,
       );
       // Disable Nagle's algorithm — send ESC/POS commands immediately
       // instead of buffering them. Critical for small writes like status
       // queries and cut commands.
       socket!.setOption(SocketOption.tcpNoDelay, true);
     } catch (e) {
-      socket = null;
+      await disconnect();
       return Future.error('Failed to connect to ${printer.address}:${printer.port ?? 9100} — $e');
     }
   }
@@ -120,6 +161,9 @@ class NetworkPrinterManager extends PrinterManager {
       return Future.error(
           'Socket is not connected. Call connect() before writeBytes().');
     }
+    if (_socketError != null) {
+      return Future.error('Printer connection lost: $_socketError');
+    }
 
     try {
       final bytes = Uint8List.fromList(data);
@@ -133,6 +177,9 @@ class NetworkPrinterManager extends PrinterManager {
         // Large payload — send in chunks with flush + delay.
         int offset = 0;
         while (offset < totalLength) {
+          if (_socketError != null) {
+            throw Exception('connection lost: $_socketError');
+          }
           final end =
               (offset + chunkSize > totalLength) ? totalLength : offset + chunkSize;
           socket!.add(bytes.sublist(offset, end));
@@ -156,17 +203,60 @@ class NetworkPrinterManager extends PrinterManager {
   /// need time to finish processing before a reconnect).
   @override
   Future disconnect({Duration? timeout}) async {
+    final s = socket;
+    socket = null;
     try {
-      await socket?.flush();
-      await socket?.close();
+      if (s != null && _socketError == null) {
+        await s.flush().timeout(const Duration(seconds: 3));
+        await s.close().timeout(const Duration(seconds: 3));
+      }
     } catch (_) {
       // Ignore errors during cleanup.
     } finally {
-      socket = null;
+      try {
+        await _sub?.cancel();
+      } catch (_) {}
+      _sub = null;
+      s?.destroy();
+      _socketError = null;
+      _rx.clear();
+      final w = _rxWaiter;
+      if (w != null && !w.isCompleted) w.complete();
+      _rxWaiter = null;
     }
 
     if (timeout != null) {
       await Future.delayed(timeout);
+    }
+  }
+
+  /// Asks the printer whether it can take [job]: writes the status query
+  /// and waits up to 1500ms for the first reply bytes. Connects if needed
+  /// (the connection is left open). [PrinterReadiness.unknown] on any error
+  /// or when the printer does not answer.
+  Future<PrinterReadiness> checkStatus(List<int> job) async {
+    final q = PrinterStatusQuery.forJob(job);
+    try {
+      await connect();
+      final s = socket;
+      if (s == null || _socketError != null) return PrinterReadiness.unknown;
+      _rx.clear();
+      final waiter = Completer<void>();
+      _rxWaiter = waiter;
+      s.add(q.query);
+      await s.flush();
+      if (_rx.isEmpty) {
+        await waiter.future
+            .timeout(const Duration(milliseconds: 1500), onTimeout: () {});
+      }
+      _rxWaiter = null;
+      if (_rx.isEmpty) return PrinterReadiness.unknown;
+      final reply = Uint8List.fromList(_rx);
+      _rx.clear();
+      return q.parse(reply);
+    } catch (_) {
+      _rxWaiter = null;
+      return PrinterReadiness.unknown;
     }
   }
 

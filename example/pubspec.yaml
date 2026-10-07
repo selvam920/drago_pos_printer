@@ -77,3 +77,11 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
+
+# Use the sibling plugin repos so the example runs against unpublished
+# changes (drago_usb_printer 0.1.7 / drago_blue_printer 1.0.4).
+dependency_overrides:
+  drago_usb_printer:
+    path: ../../drago_usb_printer
+  drago_blue_printer:
+    path: ../../drago_blue_printer

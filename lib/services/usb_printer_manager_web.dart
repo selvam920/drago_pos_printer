@@ -19,4 +19,8 @@ class USBPrinterManager {
   Future writeBytes(List<int> data) {
     throw Exception('Platform does not support');
   }
+
+  /// Status queries are not supported on web.
+  Future<PrinterReadiness> checkStatus(List<int> job) async =>
+      PrinterReadiness.unknown;
 }

@@ -16,5 +16,7 @@ export 'package:drago_pos_printer/enums/bluetooth_printer_type.dart';
 export 'package:drago_pos_printer/enums/connection_type.dart';
 export 'package:drago_pos_printer/utils/esc_pos_utils.dart';
 export 'package:drago_pos_printer/utils/tsc_utils.dart';
+export 'package:drago_pos_printer/utils/printer_status.dart';
+export 'package:drago_pos_printer/utils/label_job.dart';
 
 class DragoPrinterManager {}
