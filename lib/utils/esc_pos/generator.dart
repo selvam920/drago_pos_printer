@@ -163,35 +163,31 @@ class EscGenerator {
     return blobs;
   }
 
-  /// Image rasterization
+  /// Image rasterization: one pass over the RGBA bytes straight into the
+  /// packed 1-bit rows (a pixel darker than mid grey prints). The old way
+  /// copied, greyscaled and inverted the whole image, then grew a list one
+  /// pixel at a time -- seconds on a long receipt on a cheap tablet.
   List<int> _toRasterFormat(Image imgSrc) {
-    final Image image = Image.from(imgSrc); // make a copy
+    final Image image = imgSrc.format == Format.uint8 && imgSrc.numChannels == 4
+        ? imgSrc
+        : imgSrc.convert(format: Format.uint8, numChannels: 4);
     final int widthPx = image.width;
     final int heightPx = image.height;
-
-    grayscale(image);
-    invert(image);
-
-    // R/G/B channels are same -> keep only one channel
-    final List<int> oneChannelBytes = [];
-    final List<int> buffer = image.getBytes(order: ChannelOrder.rgba);
-    for (int i = 0; i < buffer.length; i += 4) {
-      oneChannelBytes.add(buffer[i]);
-    }
-
-    // Add some empty pixels at the end of each line (to make the width divisible by 8)
-    if (widthPx % 8 != 0) {
-      final targetWidth = (widthPx + 8) - (widthPx % 8);
-      final missingPx = targetWidth - widthPx;
-      final extra = Uint8List(missingPx);
-      for (int i = 0; i < heightPx; i++) {
-        final pos = (i * widthPx + widthPx) + i * missingPx;
-        oneChannelBytes.insertAll(pos, extra);
+    final int widthBytes = (widthPx + 7) >> 3;
+    final Uint8List rgba = image.getBytes(order: ChannelOrder.rgba);
+    final Uint8List out = Uint8List(widthBytes * heightPx);
+    var src = 0;
+    for (var y = 0; y < heightPx; y++) {
+      final row = y * widthBytes;
+      for (var x = 0; x < widthPx; x++, src += 4) {
+        // Same luminance weights as image's grayscale().
+        final lum =
+            (rgba[src] * 299 + rgba[src + 1] * 587 + rgba[src + 2] * 114) ~/
+                1000;
+        if (lum < 128) out[row + (x >> 3)] |= 0x80 >> (x & 7);
       }
     }
-
-    // Pack bits into bytes
-    return _packBitsIntoBytes(oneChannelBytes);
+    return out;
   }
 
   /// Merges each 8 values (bits) into one byte
@@ -620,10 +616,12 @@ class EscGenerator {
 
     // Adjust line spacing (for 16-unit line feeds): ESC 3 0x10 (HEX: 0x1b 0x33 0x10)
     bytes += [27, 51, 16];
+    // addAll: `bytes +=` copied the whole job again for every strip.
     for (int i = 0; i < blobs.length; ++i) {
-      bytes += List.from(header)
+      bytes
+        ..addAll(header)
         ..addAll(blobs[i])
-        ..addAll('\n'.codeUnits);
+        ..add(0x0A);
     }
     // Reset line spacing: ESC 2 (HEX: 0x1b 0x32)
     bytes += [27, 50];
@@ -658,7 +656,9 @@ class EscGenerator {
       header.add(densityByte); // m
       header.addAll(_intLowHigh(widthBytes, 2)); // xL xH
       header.addAll(_intLowHigh(heightPx, 2)); // yL yH
-      bytes += List.from(header)..addAll(resterizedData);
+      bytes
+        ..addAll(header)
+        ..addAll(resterizedData);
     } else if (imageFn == PosImageFn.graphics) {
       // 'GS ( L' - FN_112 (Image data)
       final List<int> header1 = List.from(cRasterImg.codeUnits);
