@@ -11,6 +11,10 @@ import 'printer_manager.dart';
 
 /// Bluetooth Printer
 class BluetoothPrinterManager extends PrinterManager {
+  /// The printer the Android link is open to, kept across jobs so the next
+  /// bill reuses it. Cleared on disconnect or a failed write.
+  static String? _connectedAddress;
+
   BluetoothPrinterManager(POSPrinter printer) {
     super.printer = printer;
   }
@@ -27,37 +31,19 @@ class BluetoothPrinterManager extends PrinterManager {
     try {
       if (Platform.isAndroid) {
         final bluetooth = DragoBluePrinter.instance;
-        List<BluetoothDevice> devices = [];
-        try {
-          devices = await bluetooth.getBondedDevices();
-        } catch (e) {
-          return await Future.error("Failed to get bonded devices: $e");
+        final bool? isConnected = await bluetooth.isConnected;
+        // Still linked to this printer from the last job: nothing to do.
+        // Reconnecting cost 1-3 s on every bill.
+        if (isConnected == true && _connectedAddress == printer.address) {
+          return;
         }
-
-        BluetoothDevice? device;
-        try {
-          device = devices.firstWhere((d) => d.address == printer.address);
-        } catch (e) {
-          // If not in bonded, try to create from address if possible or error
-          // Assuming user might want to connect to non-bonded if scan found it?
-          // DragoBluePrinter.connect takes BluetoothDevice.
-          // We can construct one if we have name and address, or strict bonded check.
-          // sticking to bonded check for now as per previous logic structure,
-          // but if scan() works, we might want to allow connecting to scanned devices.
-          // Let's create a temporary device object if not found in bonded,
-          // assuming the underlying plugin can handle it.
-          device = BluetoothDevice(printer.name ?? "Unknown", printer.address!);
-        }
-
-        // Check if already connected
-        bool? isConnected = await bluetooth.isConnected;
-        if (isConnected == true) {
-          // Determine if connected to the *correct* device might be hard without `connectedDevice` info
-          // but usually we can disconnect and reconnect or just assume success if we want to be safe.
-          // However, safe practice:
-          await bluetooth.disconnect();
-        }
-        await bluetooth.connect(device);
+        if (isConnected == true) await bluetooth.disconnect();
+        _connectedAddress = null;
+        // Name + address is all connect needs; no bonded-list lookup.
+        await bluetooth.connect(
+          BluetoothDevice(printer.name ?? 'Unknown', printer.address!),
+        );
+        _connectedAddress = printer.address;
       } else if (Platform.isIOS) {
         Map<String, dynamic> params = {
           "name": printer.name,
@@ -159,6 +145,8 @@ class BluetoothPrinterManager extends PrinterManager {
         await iosChannel.invokeMethod('writeData', args);
       }
     } catch (e) {
+      // A stale link (printer switched off): the next connect starts fresh.
+      _connectedAddress = null;
       return Future.error(e.toString());
     }
   }
@@ -167,6 +155,7 @@ class BluetoothPrinterManager extends PrinterManager {
   @override
   Future disconnect({Duration? timeout}) async {
     try {
+      _connectedAddress = null;
       if (Platform.isAndroid) {
         await DragoBluePrinter.instance.disconnect();
       } else if (Platform.isIOS)
