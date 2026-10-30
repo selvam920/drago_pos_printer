@@ -119,7 +119,7 @@ packages:
       path: "../drago_blue_printer"
       relative: true
     source: path
-    version: "1.0.4"
+    version: "1.0.5"
   drago_usb_printer:
     dependency: "direct main"
     description:
