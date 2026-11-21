@@ -78,6 +78,26 @@ Image receipt(int width, int height, Random rnd) {
   return img;
 }
 
+/// What Android's PDF raster gives: black ink on a transparent (0,0,0,0)
+/// background, with some see-through anti-aliased edge pixels when
+/// [edges] is set.
+Image androidReceipt(int width, int height, Random rnd, {bool edges = false}) {
+  final img = Image(width: width, height: height, numChannels: 4);
+  for (var y = 0; y < height; y++) {
+    for (var x = 0; x < width; x++) {
+      final r = rnd.nextInt(10);
+      final a =
+          r < 4
+              ? 255
+              : edges && r < 6
+              ? rnd.nextInt(256)
+              : 0;
+      img.setPixelRgba(x, y, 0, 0, 0, a);
+    }
+  }
+  return img;
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -98,5 +118,35 @@ void main() {
       final legacy = legacyImage(EscGenerator(576, 48, profile), img);
       expect(fast, legacy, reason: 'size ${w}x$h');
     }
+  });
+
+  test('transparent background prints white, as before', () async {
+    final profile = await CapabilityProfile.load();
+    final rnd = Random(11);
+    for (final (w, h) in const [(16, 25), (100, 48), (576, 120)]) {
+      final img = androidReceipt(w, h, rnd);
+      final fast = EscGenerator(576, 48, profile).image(img);
+      final legacy = legacyImage(EscGenerator(576, 48, profile), img);
+      expect(fast, legacy, reason: 'size ${w}x$h');
+    }
+    final blank = Image(width: 64, height: 24, numChannels: 4); // all clear
+    final out = EscGenerator(576, 48, profile).image(blank);
+    final legacy = legacyImage(EscGenerator(576, 48, profile), blank);
+    expect(out, legacy);
+  });
+
+  // Half see-through pixels near the 50% cut may round the other way from
+  // the old blend; only a sliver of bytes may differ.
+  test('see-through edge pixels stay close to the old output', () async {
+    final profile = await CapabilityProfile.load();
+    final img = androidReceipt(576, 96, Random(5), edges: true);
+    final fast = EscGenerator(576, 48, profile).image(img);
+    final legacy = legacyImage(EscGenerator(576, 48, profile), img);
+    expect(fast.length, legacy.length);
+    var diff = 0;
+    for (var i = 0; i < fast.length; i++) {
+      if (fast[i] != legacy[i]) diff++;
+    }
+    expect(diff, lessThan(fast.length ~/ 100));
   });
 }

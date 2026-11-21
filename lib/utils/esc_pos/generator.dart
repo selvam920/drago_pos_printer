@@ -139,6 +139,17 @@ class EscGenerator {
   /// packed 1-bit rows (a pixel darker than mid grey prints). The old way
   /// copied, greyscaled and inverted the whole image, then grew a list one
   /// pixel at a time -- seconds on a long receipt on a cheap tablet.
+  /// True when the RGBA pixel at [i] prints a dot: darker than mid grey
+  /// once laid over white paper. The alpha counts -- Android renders a PDF
+  /// onto a transparent bitmap, and reading only the colour printed that
+  /// clear background solid black.
+  static bool _isInk(Uint8List rgba, int i) {
+    // Same luminance weights as image's grayscale().
+    final int lum =
+        (rgba[i] * 299 + rgba[i + 1] * 587 + rgba[i + 2] * 114) ~/ 1000;
+    return (255 - lum) * rgba[i + 3] > 127 * 255;
+  }
+
   List<int> _toRasterFormat(Image imgSrc) {
     final Image image =
         imgSrc.format == Format.uint8 && imgSrc.numChannels == 4
@@ -153,11 +164,7 @@ class EscGenerator {
     for (var y = 0; y < heightPx; y++) {
       final row = y * widthBytes;
       for (var x = 0; x < widthPx; x++, src += 4) {
-        // Same luminance weights as image's grayscale().
-        final lum =
-            (rgba[src] * 299 + rgba[src + 1] * 587 + rgba[src + 2] * 114) ~/
-            1000;
-        if (lum < 128) out[row + (x >> 3)] |= 0x80 >> (x & 7);
+        if (_isInk(rgba, src)) out[row + (x >> 3)] |= 0x80 >> (x & 7);
       }
     }
     return out;
@@ -591,11 +598,7 @@ class EscGenerator {
         final int bit = 0x80 >> (dy & 7);
         int src = y * width * 4;
         for (int x = 0; x < width; x++, src += 4) {
-          // Same luminance weights as image's grayscale().
-          final int lum =
-              (rgba[src] * 299 + rgba[src + 1] * 587 + rgba[src + 2] * 114) ~/
-              1000;
-          if (lum < 128) strip[x * 3 + byteInCol] |= bit;
+          if (_isInk(rgba, src)) strip[x * 3 + byteInCol] |= bit;
         }
       }
       bytes
