@@ -8,10 +8,14 @@ import '../../drago_pos_printer.dart';
 import 'commands.dart';
 
 class EscGenerator {
-  EscGenerator(this.paperWidthMM, this.charPerLine, this._profile,
-      {this.spaceBetweenRows = 5,
-      this.codec = latin1,
-      this.fontTwoCharPerLine = 0});
+  EscGenerator(
+    this.paperWidthMM,
+    this.charPerLine,
+    this._profile, {
+    this.spaceBetweenRows = 5,
+    this.codec = latin1,
+    this.fontTwoCharPerLine = 0,
+  });
 
   // Ticket config
   int paperWidthMM;
@@ -118,7 +122,8 @@ class EscGenerator {
     }
     if (value < 0 || value > maxInput) {
       throw Exception(
-          'Number is too large. Can only output up to $maxInput in $bytesNb bytes');
+        'Number is too large. Can only output up to $maxInput in $bytesNb bytes',
+      );
     }
 
     final List<int> res = <int>[];
@@ -130,47 +135,15 @@ class EscGenerator {
     return res;
   }
 
-  /// Extract slices of an image as equal-sized blobs of column-format data.
-  ///
-  /// [image] Image to extract from
-  /// [lineHeight] Printed line height in dots
-  List<List<int>> _toColumnFormat(Image imgSrc, int lineHeight) {
-    final Image image = Image.from(imgSrc); // make a copy
-
-    // Determine new width: closest integer that is divisible by lineHeight
-    final int widthPx = (image.width + lineHeight) - (image.width % lineHeight);
-    final int heightPx = image.height;
-
-    // Create a black bottom layer
-    final biggerImage = copyResize(image, width: widthPx, height: heightPx);
-    fill(biggerImage, color: ColorInt8(0));
-    // Insert source image into bigger one
-    compositeImage(biggerImage, image, dstX: 0, dstY: 0);
-
-    int left = 0;
-    final List<List<int>> blobs = [];
-
-    while (left < widthPx) {
-      final Image slice = copyCrop(biggerImage,
-          x: left, y: 0, width: lineHeight, height: heightPx);
-      grayscale(slice);
-      final imgBinary = slice.convert(numChannels: 1);
-      final bytes = imgBinary.getBytes();
-      blobs.add(bytes);
-      left += lineHeight;
-    }
-
-    return blobs;
-  }
-
   /// Image rasterization: one pass over the RGBA bytes straight into the
   /// packed 1-bit rows (a pixel darker than mid grey prints). The old way
   /// copied, greyscaled and inverted the whole image, then grew a list one
   /// pixel at a time -- seconds on a long receipt on a cheap tablet.
   List<int> _toRasterFormat(Image imgSrc) {
-    final Image image = imgSrc.format == Format.uint8 && imgSrc.numChannels == 4
-        ? imgSrc
-        : imgSrc.convert(format: Format.uint8, numChannels: 4);
+    final Image image =
+        imgSrc.format == Format.uint8 && imgSrc.numChannels == 4
+            ? imgSrc
+            : imgSrc.convert(format: Format.uint8, numChannels: 4);
     final int widthPx = image.width;
     final int heightPx = image.height;
     final int widthBytes = (widthPx + 7) >> 3;
@@ -183,36 +156,11 @@ class EscGenerator {
         // Same luminance weights as image's grayscale().
         final lum =
             (rgba[src] * 299 + rgba[src + 1] * 587 + rgba[src + 2] * 114) ~/
-                1000;
+            1000;
         if (lum < 128) out[row + (x >> 3)] |= 0x80 >> (x & 7);
       }
     }
     return out;
-  }
-
-  /// Merges each 8 values (bits) into one byte
-  List<int> _packBitsIntoBytes(List<int> bytes) {
-    const pxPerLine = 8;
-    final List<int> res = <int>[];
-    const threshold = 127; // set the greyscale -> b/w threshold here
-    for (int i = 0; i < bytes.length; i += pxPerLine) {
-      int newVal = 0;
-      for (int j = 0; j < pxPerLine; j++) {
-        newVal = _transformUint32Bool(
-          newVal,
-          pxPerLine - j,
-          bytes[i + j] > threshold,
-        );
-      }
-      res.add(newVal ~/ 2);
-    }
-    return res;
-  }
-
-  /// Replaces a single bit in a 32-bit unsigned integer.
-  int _transformUint32Bool(int uint32, int shift, bool newValue) {
-    return ((0xFFFFFFFF ^ (0x1 << shift)) & uint32) |
-        ((newValue ? 1 : 0) << shift);
   }
 
   // ************************ (end) Internal helpers  ************************
@@ -278,9 +226,11 @@ class EscGenerator {
   List<int> setStyles(PosStyles styles, {bool isKanji = false}) {
     List<int> bytes = [];
     if (styles.align != _styles.align) {
-      bytes += latin1.encode(styles.align == PosAlign.left
-          ? cAlignLeft
-          : (styles.align == PosAlign.center ? cAlignCenter : cAlignRight));
+      bytes += latin1.encode(
+        styles.align == PosAlign.left
+            ? cAlignLeft
+            : (styles.align == PosAlign.center ? cAlignCenter : cAlignRight),
+      );
       _styles = _styles.copyWith(align: styles.align);
     }
 
@@ -304,9 +254,10 @@ class EscGenerator {
 
     // Set font
     if (styles.fontType != null && styles.fontType != _styles.fontType) {
-      bytes += styles.fontType == PosFontType.fontB
-          ? cFontB.codeUnits
-          : cFontA.codeUnits;
+      bytes +=
+          styles.fontType == PosFontType.fontB
+              ? cFontB.codeUnits
+              : cFontA.codeUnits;
       _styles = _styles.copyWith(fontType: styles.fontType);
     } else if (_font != null && _font != _styles.fontType) {
       bytes += _font == PosFontType.fontB ? cFontB.codeUnits : cFontA.codeUnits;
@@ -336,8 +287,10 @@ class EscGenerator {
         List.from(cCodeTable.codeUnits)
           ..add(_profile.getCodePageId(styles.codeTable)),
       );
-      _styles =
-          _styles.copyWith(align: styles.align, codeTable: styles.codeTable);
+      _styles = _styles.copyWith(
+        align: styles.align,
+        codeTable: styles.codeTable,
+      );
     } else if (_codeTable != null) {
       bytes += Uint8List.fromList(
         List.from(cCodeTable.codeUnits)
@@ -399,9 +352,7 @@ class EscGenerator {
   List<int> feed(int n) {
     List<int> bytes = [];
     if (n >= 0 && n <= 255) {
-      bytes += Uint8List.fromList(
-        List.from(cFeedN.codeUnits)..add(n),
-      );
+      bytes += Uint8List.fromList(List.from(cFeedN.codeUnits)..add(n));
     }
     return bytes;
   }
@@ -444,8 +395,10 @@ class EscGenerator {
   /// Beeps [n] times
   ///
   /// Beep [duration] could be between 50 and 450 ms.
-  List<int> beep(
-      {int n = 3, PosBeepDuration duration = PosBeepDuration.beep450ms}) {
+  List<int> beep({
+    int n = 3,
+    PosBeepDuration duration = PosBeepDuration.beep450ms,
+  }) {
     List<int> bytes = [];
     if (n <= 0) {
       return [];
@@ -467,9 +420,7 @@ class EscGenerator {
   /// Reverse feed for [n] lines (if supported by the priner)
   List<int> reverseFeed(int n) {
     List<int> bytes = [];
-    bytes += Uint8List.fromList(
-      List.from(cReverseFeedN.codeUnits)..add(n),
-    );
+    bytes += Uint8List.fromList(List.from(cReverseFeedN.codeUnits)..add(n));
     return bytes;
   }
 
@@ -487,8 +438,9 @@ class EscGenerator {
     List<PosColumn> nextRow = <PosColumn>[];
 
     for (int i = 0; i < cols.length; ++i) {
-      int colInd =
-          cols.sublist(0, i).fold(0, (int sum, col) => sum + col.width);
+      int colInd = cols
+          .sublist(0, i)
+          .fold(0, (int sum, col) => sum + col.width);
       double charWidth = _getCharWidth(cols[i].styles);
       double fromPos = _colIndToPosition(colInd);
       final double toPos =
@@ -497,26 +449,32 @@ class EscGenerator {
 
       if (!cols[i].containsChinese) {
         // CASE 1: containsChinese = false
-        Uint8List encodedToPrint = cols[i].textEncoded != null
-            ? cols[i].textEncoded!
-            : _encode(cols[i].text);
+        Uint8List encodedToPrint =
+            cols[i].textEncoded != null
+                ? cols[i].textEncoded!
+                : _encode(cols[i].text);
 
         // If the col's content is too long, split it to the next row
         int realCharactersNb = encodedToPrint.length;
         if (realCharactersNb > maxCharactersNb) {
           // Print max possible and split to the next row
-          Uint8List encodedToPrintNextRow =
-              encodedToPrint.sublist(maxCharactersNb);
+          Uint8List encodedToPrintNextRow = encodedToPrint.sublist(
+            maxCharactersNb,
+          );
           encodedToPrint = encodedToPrint.sublist(0, maxCharactersNb);
           isNextRow = true;
-          nextRow.add(PosColumn(
+          nextRow.add(
+            PosColumn(
               textEncoded: encodedToPrintNextRow,
               width: cols[i].width,
-              styles: cols[i].styles));
+              styles: cols[i].styles,
+            ),
+          );
         } else {
           // Insert an empty col
-          nextRow.add(PosColumn(
-              text: '', width: cols[i].width, styles: cols[i].styles));
+          nextRow.add(
+            PosColumn(text: '', width: cols[i].width, styles: cols[i].styles),
+          );
         }
         // end rows splitting
         bytes += _text(
@@ -543,15 +501,19 @@ class EscGenerator {
 
         if (toPrintNextRow.isNotEmpty) {
           isNextRow = true;
-          nextRow.add(PosColumn(
+          nextRow.add(
+            PosColumn(
               text: toPrintNextRow,
               containsChinese: true,
               width: cols[i].width,
-              styles: cols[i].styles));
+              styles: cols[i].styles,
+            ),
+          );
         } else {
           // Insert an empty col
-          nextRow.add(PosColumn(
-              text: '', width: cols[i].width, styles: cols[i].styles));
+          nextRow.add(
+            PosColumn(text: '', width: cols[i].width, styles: cols[i].styles),
+          );
         }
 
         // Print current row
@@ -586,45 +548,63 @@ class EscGenerator {
   ///
   /// [image] is an instanse of class from [Image library](https://pub.dev/packages/image)
   List<int> image(Image imgSrc, {PosAlign align = PosAlign.center}) {
-    List<int> bytes = [];
+    final List<int> bytes = [];
     // Image alignment
-    bytes += setStyles(PosStyles().copyWith(align: align));
+    bytes.addAll(setStyles(PosStyles().copyWith(align: align)));
 
-    final Image image = Image.from(imgSrc); // make a copy
+    // One pass straight from the RGBA bytes into 24-dot column strips. The
+    // old way copied, inverted, flipped and rotated the whole receipt, padded
+    // it into another copy, cropped and greyscaled every strip and packed
+    // bits through a function call per pixel -- seconds on a long bill on a
+    // TV box or cheap tablet, before the printer got a byte. The flip +
+    // 270-degree rotation is a transpose, so a strip is just 24 source rows
+    // read column by column; the bytes sent are the same (a pixel darker
+    // than mid grey prints, top pixel in the high bit).
+    final Image image =
+        imgSrc.format == Format.uint8 && imgSrc.numChannels == 4
+            ? imgSrc
+            : imgSrc.convert(format: Format.uint8, numChannels: 4);
+    final int width = image.width;
+    final int height = image.height;
+    final Uint8List rgba = image.getBytes(order: ChannelOrder.rgba);
 
-    invert(image);
-    flip(image, direction: FlipDirection.horizontal);
-    final Image imageRotated = copyRotate(image, angle: 270);
+    const int stripDots = 24; // 24-dot double density (m = 33)
+    // As before: rows padded up past the last full strip (always at least
+    // one blank strip more), so printers feed exactly as they did.
+    final int strips = (height + stripDots - height % stripDots) ~/ stripDots;
 
-    int lineHeight = 3;
-    List<List<int>> blobs = _toColumnFormat(imageRotated, lineHeight * 8);
+    final List<int> header =
+        List.from(cBitImg.codeUnits)
+          ..add(1 + 32)
+          ..addAll(_intLowHigh(width, 2));
 
-    // Compress according to line density
-    // Line height contains 8 or 24 pixels of src image
-    // Each blobs[i] contains greyscale bytes [0-255]
-    // const int pxPerLine = 24 ~/ lineHeight;
-    for (int blobInd = 0; blobInd < blobs.length; blobInd++) {
-      blobs[blobInd] = _packBitsIntoBytes(blobs[blobInd]);
-    }
-
-    int heightPx = imageRotated.height;
-    int densityByte = 1 + 32;
-
-    final List<int> header = List.from(cBitImg.codeUnits);
-    header.add(densityByte);
-    header.addAll(_intLowHigh(heightPx, 2));
-
-    // Adjust line spacing (for 16-unit line feeds): ESC 3 0x10 (HEX: 0x1b 0x33 0x10)
-    bytes += [27, 51, 16];
-    // addAll: `bytes +=` copied the whole job again for every strip.
-    for (int i = 0; i < blobs.length; ++i) {
+    // Adjust line spacing (for 16-unit line feeds): ESC 3 0x10
+    bytes.addAll(const [27, 51, 16]);
+    final Uint8List strip = Uint8List(width * 3);
+    for (int s = 0; s < strips; s++) {
+      strip.fillRange(0, strip.length, 0);
+      final int top = s * stripDots;
+      for (int dy = 0; dy < stripDots; dy++) {
+        final int y = top + dy;
+        if (y >= height) break;
+        final int byteInCol = dy >> 3;
+        final int bit = 0x80 >> (dy & 7);
+        int src = y * width * 4;
+        for (int x = 0; x < width; x++, src += 4) {
+          // Same luminance weights as image's grayscale().
+          final int lum =
+              (rgba[src] * 299 + rgba[src + 1] * 587 + rgba[src + 2] * 114) ~/
+              1000;
+          if (lum < 128) strip[x * 3 + byteInCol] |= bit;
+        }
+      }
       bytes
         ..addAll(header)
-        ..addAll(blobs[i])
+        ..addAll(strip)
         ..add(0x0A);
     }
-    // Reset line spacing: ESC 2 (HEX: 0x1b 0x32)
-    bytes += [27, 50];
+    // Reset line spacing: ESC 2
+    bytes.addAll(const [27, 50]);
     return bytes;
   }
 
@@ -790,8 +770,10 @@ class EscGenerator {
   }) {
     List<int> bytes = [];
     if (colInd != null) {
-      double charWidth =
-          _getCharWidth(styles, maxCharsPerLine: maxCharsPerLine);
+      double charWidth = _getCharWidth(
+        styles,
+        maxCharsPerLine: maxCharsPerLine,
+      );
       double fromPos = _colIndToPosition(colInd);
 
       // Align
@@ -855,5 +837,5 @@ class EscGenerator {
     bytes += emptyLines(linesAfter + 1);
     return bytes;
   }
-// ************************ (end) Internal command generators ************************
+  // ************************ (end) Internal command generators ************************
 }
