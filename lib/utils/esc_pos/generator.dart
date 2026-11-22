@@ -585,11 +585,22 @@ class EscGenerator {
           ..add(1 + 32)
           ..addAll(_intLowHigh(width, 2));
 
+    // A strip with no ink goes as a one-column white image (9 bytes, not
+    // width x 3): still a 24-dot bit image, so the printer feeds exactly as
+    // for the full strip. A receipt is a third or more white rows, and over
+    // Bluetooth (10-30 KB/s) every byte is time.
+    final List<int> blankStrip =
+        List.from(cBitImg.codeUnits)
+          ..add(1 + 32)
+          ..addAll(_intLowHigh(1, 2))
+          ..addAll(const [0, 0, 0, 0x0A]);
+
     // Adjust line spacing (for 16-unit line feeds): ESC 3 0x10
     bytes.addAll(const [27, 51, 16]);
     final Uint8List strip = Uint8List(width * 3);
     for (int s = 0; s < strips; s++) {
       strip.fillRange(0, strip.length, 0);
+      var inked = false;
       final int top = s * stripDots;
       for (int dy = 0; dy < stripDots; dy++) {
         final int y = top + dy;
@@ -598,8 +609,15 @@ class EscGenerator {
         final int bit = 0x80 >> (dy & 7);
         int src = y * width * 4;
         for (int x = 0; x < width; x++, src += 4) {
-          if (_isInk(rgba, src)) strip[x * 3 + byteInCol] |= bit;
+          if (_isInk(rgba, src)) {
+            strip[x * 3 + byteInCol] |= bit;
+            inked = true;
+          }
         }
+      }
+      if (!inked) {
+        bytes.addAll(blankStrip);
+        continue;
       }
       bytes
         ..addAll(header)
@@ -635,13 +653,57 @@ class EscGenerator {
       final int densityByte =
           (highDensityVertical ? 0 : 1) + (highDensityHorizontal ? 0 : 2);
 
-      final List<int> header = List.from(cRasterImg2.codeUnits);
-      header.add(densityByte); // m
-      header.addAll(_intLowHigh(widthBytes, 2)); // xL xH
-      header.addAll(_intLowHigh(heightPx, 2)); // yL yH
-      bytes
-        ..addAll(header)
-        ..addAll(resterizedData);
+      void raster(int xBytes, int rows, Iterable<int> data) =>
+          bytes
+            ..addAll(cRasterImg2.codeUnits)
+            ..add(densityByte) // m
+            ..addAll(_intLowHigh(xBytes, 2)) // xL xH
+            ..addAll(_intLowHigh(rows, 2)) // yL yH
+            ..addAll(data);
+
+      // A run of blank rows goes as a one-byte-wide white raster of the same
+      // height: the printer feeds the same dots, but sends `rows` bytes, not
+      // `widthBytes x rows` (receipts are a third or more white -- seconds
+      // over Bluetooth). Short gaps (under [minBlankRun] rows, e.g. between
+      // text lines) stay inside the image so it is not cut into slivers.
+      const int minBlankRun = 8;
+      bool blankRow(int y) {
+        final int o = y * widthBytes;
+        for (int i = 0; i < widthBytes; i++) {
+          if (resterizedData[o + i] != 0) return false;
+        }
+        return true;
+      }
+
+      int y = 0;
+      while (y < heightPx) {
+        int end = y;
+        while (end < heightPx && blankRow(end)) {
+          end++;
+        }
+        if (end - y >= minBlankRun || (end == heightPx && end > y)) {
+          raster(1, end - y, List<int>.filled(end - y, 0));
+          y = end;
+          continue;
+        }
+        // Ink from y up to the next blank run long enough to split at.
+        int inkEnd = end;
+        while (inkEnd < heightPx) {
+          int b = inkEnd;
+          while (b < heightPx && blankRow(b)) {
+            b++;
+          }
+          if (b - inkEnd >= minBlankRun || b == heightPx) break;
+          inkEnd = b + 1;
+        }
+        if (inkEnd > heightPx) inkEnd = heightPx;
+        raster(
+          widthBytes,
+          inkEnd - y,
+          resterizedData.sublist(y * widthBytes, inkEnd * widthBytes),
+        );
+        y = inkEnd;
+      }
     } else if (imageFn == PosImageFn.graphics) {
       // 'GS ( L' - FN_112 (Image data)
       final List<int> header1 = List.from(cRasterImg.codeUnits);
