@@ -93,3 +93,11 @@ Fix android AGP
 * ESC/POS label jobs are sent as one raster block (blank rows above/below trimmed) instead of 128-row bands.
 * Example: Label settings card (language, DPI, compression, size, gap) and a Label print button on the USB, Bluetooth and network screens.
 * Requires drago_blue_printer ^1.0.4 and drago_usb_printer ^0.1.7.
+
+## 1.1.11
+* Bluetooth: the link is kept between jobs, so the next print does not reconnect (1-3 s saved per bill); connect needs no bonded-list read.
+* ESC/POS images are about 20x faster to encode: `image()` (ESC *) reads the pixels once instead of copying, flipping, rotating and slicing the whole picture; GS v 0 packs bits in one pass.
+* Images keep their alpha: a pixel prints by its darkness laid over white paper. Android rasters PDFs onto a transparent bitmap, and its clear background was printing solid black.
+* Blank rows are no longer sent in full: a blank ESC * strip is a one-column white image (9 bytes) and a run of 8+ blank GS v 0 rows a one-byte-wide raster -- the printer feeds the same, far fewer bytes go over Bluetooth.
+* Dropped the unused network_info_plus dependency.
+* Requires drago_blue_printer ^1.0.6 and drago_usb_printer ^0.1.8.

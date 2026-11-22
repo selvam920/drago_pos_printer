@@ -1,1 +1,15 @@
+# pub uses this instead of .gitignore: keep both lists here.
+.DS_Store
+.dart_tool/
+
+.packages
+.pub/
+.local-chromium
+.local-chromium/
+/example/.local-chromium/
+
+build/
 pubspec_overrides.yaml
+
+pubspec_overrides.yaml
+local.properties
